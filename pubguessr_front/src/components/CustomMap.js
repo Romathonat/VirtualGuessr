@@ -9,7 +9,7 @@ const CustomMap = ({ targetPosition, onScore }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
-  const [score, setScore] = useState(null);
+  // const [score, setScore] = useState(null);
 
   useEffect(() => {
     const img = new Image();
@@ -148,14 +148,14 @@ const CustomMap = ({ targetPosition, onScore }) => {
 
     // If zooming out to 1, center the image
     if (newZoom === 1) {
-      newOffsetX = (rect.width - imageSize.width) / 2;
-      newOffsetY = (rect.height - imageSize.height) / 2;
+      newOffsetX = (rect.width - rect.width) / 2;
+      newOffsetY = (rect.height - rect.height) / 2;
     } else {
       // Apply bounds to prevent white space
       const maxOffsetX = 0;
       const maxOffsetY = 0;
-      const minOffsetX = Math.min(0, rect.width - imageSize.width * newZoom);
-      const minOffsetY = Math.min(0, rect.height - imageSize.height * newZoom);
+      const minOffsetX = Math.min(0, rect.width - rect.width * newZoom);
+      const minOffsetY = Math.min(0, rect.height - rect.height * newZoom);
       
       newOffsetX = Math.max(minOffsetX, Math.min(maxOffsetX, newOffsetX));
       newOffsetY = Math.max(minOffsetY, Math.min(maxOffsetY, newOffsetY));
@@ -184,8 +184,8 @@ const CustomMap = ({ targetPosition, onScore }) => {
       let newOffsetY = event.clientY - dragStart.y;
 
       // Calculer les limites de déplacement
-      const minOffsetX = rect.width - imageSize.width * zoom;
-      const minOffsetY = rect.height - imageSize.height * zoom;
+      const minOffsetX = rect.width - rect.width * zoom;
+      const minOffsetY = rect.height - rect.height * zoom;
 
       // Appliquer les limites
       newOffsetX = Math.min(0, Math.max(newOffsetX, minOffsetX));
@@ -227,6 +227,23 @@ const CustomMap = ({ targetPosition, onScore }) => {
       >
         Choose
       </button>
+      <div 
+        style={{
+          position: 'absolute',
+          top: '10px',
+          left: '10px',
+          background: 'rgba(0, 0, 0, 0.5)',
+          color: 'white',
+          padding: '5px',
+          borderRadius: '5px',
+          fontSize: '12px',
+          zIndex: 10
+        }}
+      >
+        Offset: X: {offset.x.toFixed(2)}, Y: {offset.y.toFixed(2)}<br/>
+        Image: X: {imageSize.width.toFixed(2)}, Y: {imageSize.height.toFixed(2)} <br/>
+        {/* Canvas bouding: X: {canvasRef.current.getBoundingClientRect().width.toFixed(2)}, Y: {canvasRef.current.getBoundingClientRect().height.toFixed(2)} */}
+      </div>
     </div>
   );
 };
