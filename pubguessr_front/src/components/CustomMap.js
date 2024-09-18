@@ -9,13 +9,12 @@ const CustomMap = ({ targetPosition, onScore }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
-  // const [score, setScore] = useState(null);
 
   useEffect(() => {
     const img = new Image();
-    img.onload = () => {
-      setImageSize({ width: img.width, height: img.height });
-    };
+    // img.onload = () => {
+    //   setImageSize({ width: img.width, height: img.height });
+    // };
     img.src = '/images/erangel.jpg'; // Assurez-vous que ce chemin est correct
   }, []);
 
@@ -104,7 +103,7 @@ const CustomMap = ({ targetPosition, onScore }) => {
 
   const computeScore = (distance) => {
     const maxScore = 5000;
-    const maxDistance = Math.sqrt(imageSize.width * imageSize.width + imageSize.height * imageSize.height);
+    const maxDistance = Math.sqrt(canvasRef.current.width * canvasRef.current.width + canvasRef.current.height * canvasRef.current.height);
     
     // Fonction exponentielle inverse pour le calcul du score
     const normalizedDistance = distance / maxDistance;
@@ -240,9 +239,6 @@ const CustomMap = ({ targetPosition, onScore }) => {
           zIndex: 10
         }}
       >
-        Offset: X: {offset.x.toFixed(2)}, Y: {offset.y.toFixed(2)}<br/>
-        Image: X: {imageSize.width.toFixed(2)}, Y: {imageSize.height.toFixed(2)} <br/>
-        {/* Canvas bouding: X: {canvasRef.current.getBoundingClientRect().width.toFixed(2)}, Y: {canvasRef.current.getBoundingClientRect().height.toFixed(2)} */}
       </div>
     </div>
   );

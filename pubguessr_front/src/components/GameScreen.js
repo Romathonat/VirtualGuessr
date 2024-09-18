@@ -26,7 +26,7 @@ const GameScreen = ({ screenshotUrl, targetPosition }) => {
         right: '20px',
         width: '800px',
         height: 'auto',
-        border: '2px solid white',
+        // border: '2px solid white',
         borderRadius: '10px',
         overflow: 'hidden'
       }}>
