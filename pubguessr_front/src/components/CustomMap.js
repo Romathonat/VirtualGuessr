@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 
-const CustomMap = ({ actualPosition }) => {
+const CustomMap = ({ actualPosition: targetPosition }) => {
   const canvasRef = useRef(null);
   const [userMarker, setUserMarker] = useState(null);
   const [showActualMarker, setShowActualMarker] = useState(false);
@@ -8,6 +8,16 @@ const CustomMap = ({ actualPosition }) => {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+  const [score, setScore] = useState(null);
+
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      setImageSize({ width: img.width, height: img.height });
+    };
+    img.src = '/images/erangel.jpg'; // Assurez-vous que ce chemin est correct
+  }, []);
 
   useEffect(() => {
     drawMap();
@@ -32,11 +42,11 @@ const CustomMap = ({ actualPosition }) => {
         drawMarker(ctx, userMarker.x, userMarker.y, 'red');
       }
       
-      if (showActualMarker && actualPosition) {
-        drawMarker(ctx, actualPosition.x, actualPosition.y, 'green');
+      if (showActualMarker && targetPosition) {
+        drawMarker(ctx, targetPosition.x, targetPosition.y, 'green');
         
         if (userMarker) {
-          drawDashedLine(ctx, userMarker, actualPosition);
+          drawDashedLine(ctx, userMarker, targetPosition);
         }
       }
       
@@ -78,7 +88,27 @@ const CustomMap = ({ actualPosition }) => {
     setUserMarker({ x, y });
   };
 
+  const computeDistance = (point1, point2) => {
+    const dx = point1.x - point2.x;
+    const dy = point1.y - point2.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const computeScore = (distance) => {
+    const maxScore = 5000;
+    const maxDistance = Math.sqrt(imageSize.width * imageSize.width + imageSize.height * imageSize.height);
+    
+    // Fonction exponentielle inverse pour le calcul du score
+    const normalizedDistance = distance / maxDistance;
+    const score = maxScore * Math.exp(-5 * normalizedDistance);
+    
+    return Math.round(score);
+  };
+
   const handleChooseClick = () => {
+    const distance = computeDistance(userMarker, targetPosition);
+    const newScore = computeScore(distance);
+    setScore(newScore);
     setShowActualMarker(true);
   };
 
@@ -86,23 +116,39 @@ const CustomMap = ({ actualPosition }) => {
     event.preventDefault();
     const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1;
     const newZoom = Math.max(1, Math.min(5, zoom * zoomFactor));
-    
+   
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
+    
+    // Calculate the position of the mouse relative to the canvas
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
-    
+   
+    // Calculate the position of the mouse relative to the image at current zoom
+    const imageX = (mouseX - offset.x) / zoom;
+    const imageY = (mouseY - offset.y) / zoom;
+
     let newOffsetX, newOffsetY;
 
-    if (zoomFactor > 1){
-      newOffsetX = mouseX - (mouseX - offset.x) * (newZoom / zoom);
-      newOffsetY = mouseY - (mouseY - offset.y) * (newZoom / zoom);
+    // Calculate new offsets to keep the point under the mouse in the same position
+    newOffsetX = mouseX - imageX * newZoom;
+    newOffsetY = mouseY - imageY * newZoom;
+
+    // If zooming out to 1, center the image
+    if (newZoom === 1) {
+      newOffsetX = (rect.width - imageSize.width) / 2;
+      newOffsetY = (rect.height - imageSize.height) / 2;
+    } else {
+      // Apply bounds to prevent white space
+      const maxOffsetX = 0;
+      const maxOffsetY = 0;
+      const minOffsetX = Math.min(0, rect.width - imageSize.width * newZoom);
+      const minOffsetY = Math.min(0, rect.height - imageSize.height * newZoom);
+      
+      newOffsetX = Math.max(minOffsetX, Math.min(maxOffsetX, newOffsetX));
+      newOffsetY = Math.max(minOffsetY, Math.min(maxOffsetY, newOffsetY));
     }
-    else{
-      newOffsetX = (mouseX - (mouseX - offset.x) * (newZoom / zoom)) / 2 ;
-      newOffsetY = (mouseY - (mouseY - offset.y) * (newZoom / zoom)) / 2;
-    }
-    
+
     setZoom(newZoom);
     setOffset({ x: newOffsetX, y: newOffsetY });
   };
@@ -119,13 +165,23 @@ const CustomMap = ({ actualPosition }) => {
 
   const handleMouseMove = (event) => {
     if (isDragging) {
-      const newOffset = {
-        x: event.clientX - dragStart.x,
-        y: event.clientY - dragStart.y
-      };
+      const canvas = canvasRef.current;
+      const rect = canvas.getBoundingClientRect();
+
+      let newOffsetX = event.clientX - dragStart.x;
+      let newOffsetY = event.clientY - dragStart.y;
+
+      // Calculer les limites de déplacement
+      const minOffsetX = rect.width - imageSize.width * zoom;
+      const minOffsetY = rect.height - imageSize.height * zoom;
+
+      // Appliquer les limites
+      newOffsetX = Math.min(0, Math.max(newOffsetX, minOffsetX));
+      newOffsetY = Math.min(0, Math.max(newOffsetY, minOffsetY));
+
       if (zoom > 1)
       {
-        setOffset(newOffset);
+        setOffset({ x: newOffsetX, y: newOffsetY });
       }
     }
   };
@@ -147,6 +203,12 @@ const CustomMap = ({ actualPosition }) => {
         style={{ maxWidth: '100%', height: 'auto', cursor: isDragging ? 'grabbing' : 'grab' }} 
       />
       <button onClick={handleChooseClick} style={{ marginTop: '10px' }}>Choose</button>
+      {score !== null && (
+        <div style={{ marginTop: '10px' }}>
+          <p>Score: {score}</p>
+          <p>Distance: {computeDistance(userMarker, targetPosition).toFixed(2)} pixels</p>
+        </div>
+      )}
     </div>
   );
 };
