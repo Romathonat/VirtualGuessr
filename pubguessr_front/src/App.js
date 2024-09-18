@@ -1,15 +1,16 @@
 import React from 'react';
-import CustomMap from './components/CustomMap';
+import GameScreen from './components/GameScreen';
 
-function App() {
-  const actualPosition = { x: 300, y: 200 }; // Exemple de position
+const App = () => {
+  const screenshotUrl = '/images/erangel_screen_1.jpg';
+  const targetPosition = { x: 500, y: 300 }; // Exemple de position réelle
 
   return (
-    <div>
-      <h1>PUBG GeoGuessr</h1>
-      <CustomMap actualPosition={actualPosition} />
-    </div>
+    <GameScreen 
+      screenshotUrl={screenshotUrl}
+      targetPosition={targetPosition}
+    />
   );
-}
+};
 
 export default App;

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 
-const CustomMap = ({ actualPosition: targetPosition }) => {
+const CustomMap = ({ targetPosition, onScore }) => {
   const canvasRef = useRef(null);
   const [userMarker, setUserMarker] = useState(null);
   const [showActualMarker, setShowActualMarker] = useState(false);
@@ -78,14 +78,22 @@ const CustomMap = ({ actualPosition: targetPosition }) => {
   };
 
   const handleCanvasClick = (event) => {
-    if (showActualMarker || isDragging) {
-      return;
+    if (showActualMarker) {
+      return; // Empêche de placer un nouveau marqueur après avoir choisi
     }
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const x = (event.clientX - rect.left - offset.x) / zoom;
-    const y = (event.clientY - rect.top - offset.y) / zoom;
-    setUserMarker({ x, y });
+    const scaleX = canvas.width / rect.width;    // Rapport entre la taille logique et la taille d'affichage
+    const scaleY = canvas.height / rect.height;
+
+    const x = (event.clientX - rect.left) * scaleX;
+    const y = (event.clientY - rect.top) * scaleY;
+
+    // Appliquer le zoom et l'offset inverse pour obtenir la position réelle sur l'image
+    const imageX = (x - offset.x) / zoom;
+    const imageY = (y - offset.y) / zoom;
+
+    setUserMarker({ x: imageX, y: imageY });
   };
 
   const computeDistance = (point1, point2) => {
@@ -106,10 +114,14 @@ const CustomMap = ({ actualPosition: targetPosition }) => {
   };
 
   const handleChooseClick = () => {
-    const distance = computeDistance(userMarker, targetPosition);
-    const newScore = computeScore(distance);
-    setScore(newScore);
-    setShowActualMarker(true);
+    if (userMarker) {
+      const distance = computeDistance(userMarker, targetPosition);
+      const newScore = computeScore(distance);
+      onScore(newScore); // Communique le score au composant parent
+    } else {
+        alert("Veuillez placer un marqueur avant de choisir.");
+    }
+      setShowActualMarker(true);
   };
 
   const handleWheel = (event) => {
@@ -190,8 +202,9 @@ const CustomMap = ({ actualPosition: targetPosition }) => {
     setIsDragging(false);
   };
 
+
   return (
-    <div>
+    <div style={{ width: '100%', height: '100%' }}>
       <canvas 
         ref={canvasRef} 
         onClick={handleCanvasClick}
@@ -200,15 +213,20 @@ const CustomMap = ({ actualPosition: targetPosition }) => {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        style={{ maxWidth: '100%', height: 'auto', cursor: isDragging ? 'grabbing' : 'grab' }} 
+        style={{ width: '100%', height: '100%', cursor: isDragging ? 'grabbing' : 'grab' }} 
       />
-      <button onClick={handleChooseClick} style={{ marginTop: '10px' }}>Choose</button>
-      {score !== null && (
-        <div style={{ marginTop: '10px' }}>
-          <p>Score: {score}</p>
-          <p>Distance: {computeDistance(userMarker, targetPosition).toFixed(2)} pixels</p>
-        </div>
-      )}
+      <button 
+        onClick={handleChooseClick} 
+        style={{ 
+          position: 'absolute', 
+          bottom: '10px', 
+          left: '50%', 
+          transform: 'translateX(-50%)',
+          zIndex: 10
+        }}
+      >
+        Choose
+      </button>
     </div>
   );
 };
