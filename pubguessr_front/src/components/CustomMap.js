@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 
-const CustomMap = ({ targetPosition, onScore }) => {
+const CustomMap = ({ targetPosition, onScore, score }) => {
   const canvasRef = useRef(null);
   const [userMarker, setUserMarker] = useState(null);
   const [showActualMarker, setShowActualMarker] = useState(false);
@@ -8,56 +8,55 @@ const CustomMap = ({ targetPosition, onScore }) => {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   useEffect(() => {
     const img = new Image();
-    // img.onload = () => {
-    //   setImageSize({ width: img.width, height: img.height });
-    // };
-    img.src = '/images/erangel.jpg'; // Assurez-vous que ce chemin est correct
+    img.src = '/images/erangel.jpg'; 
   }, []);
 
   useEffect(() => {
     drawMap();
-  }, [userMarker, showActualMarker, zoom, offset]);
+  }, [zoom, offset, userMarker, showActualMarker, isExpanded, isFullScreen]);
 
   const drawMap = () => {
+    if (!canvasRef.current) return; 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const img = new Image();
-    
+
     img.onload = () => {
       canvas.width = img.width;
       canvas.height = img.height;
-      
+
       ctx.save();
       ctx.translate(offset.x, offset.y);
       ctx.scale(zoom, zoom);
-      
+
       ctx.drawImage(img, 0, 0);
-      
+
       if (userMarker) {
         drawMarker(ctx, userMarker.x, userMarker.y, 'red');
       }
-      
+
       if (showActualMarker && targetPosition) {
         drawMarker(ctx, targetPosition.x, targetPosition.y, 'green');
-        
+
         if (userMarker) {
           drawDashedLine(ctx, userMarker, targetPosition);
         }
       }
-      
+
       ctx.restore();
     };
-    
+
     img.src = '/images/erangel.jpg';
   };
 
   const drawMarker = (ctx, x, y, color) => {
     ctx.beginPath();
-    ctx.arc(x, y, 5 / zoom, 0, 2 * Math.PI);
+    ctx.arc(x, y, 10 / zoom, 0, 2 * Math.PI);
     ctx.fillStyle = color;
     ctx.fill();
     ctx.strokeStyle = 'white';
@@ -77,12 +76,12 @@ const CustomMap = ({ targetPosition, onScore }) => {
   };
 
   const handleCanvasClick = (event) => {
-    if (showActualMarker) {
+    const canvas = canvasRef.current;
+    if (showActualMarker || !canvas) {
       return; // Empêche de placer un nouveau marqueur après avoir choisi
     }
-    const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;    // Rapport entre la taille logique et la taille d'affichage
+    const scaleX = canvas.width / rect.width;    
     const scaleY = canvas.height / rect.height;
 
     const x = (event.clientX - rect.left) * scaleX;
@@ -95,6 +94,8 @@ const CustomMap = ({ targetPosition, onScore }) => {
     setUserMarker({ x: imageX, y: imageY });
   };
 
+
+
   const computeDistance = (point1, point2) => {
     const dx = point1.x - point2.x;
     const dy = point1.y - point2.y;
@@ -104,11 +105,10 @@ const CustomMap = ({ targetPosition, onScore }) => {
   const computeScore = (distance) => {
     const maxScore = 5000;
     const maxDistance = Math.sqrt(canvasRef.current.width * canvasRef.current.width + canvasRef.current.height * canvasRef.current.height);
-    
-    // Fonction exponentielle inverse pour le calcul du score
+
     const normalizedDistance = distance / maxDistance;
     const score = maxScore * Math.exp(-5 * normalizedDistance);
-    
+
     return Math.round(score);
   };
 
@@ -116,25 +116,34 @@ const CustomMap = ({ targetPosition, onScore }) => {
     if (userMarker) {
       const distance = computeDistance(userMarker, targetPosition);
       const newScore = computeScore(distance);
-      onScore(newScore); // Communique le score au composant parent
-    } else {
-        alert("Veuillez placer un marqueur avant de choisir.");
-    }
+      onScore(newScore); 
       setShowActualMarker(true);
+      setIsFullScreen(true);
+      setZoom(1);
+      setOffset({ x: 0, y: 0 });
+    }
+  };
+
+  const handleFullScreenClose = () => {
+    setIsFullScreen(false);
+    // setShowActualMarker(true);
+    setIsExpanded(false);
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
   };
 
   const handleWheel = (event) => {
     event.preventDefault();
     const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1;
     const newZoom = Math.max(1, Math.min(5, zoom * zoomFactor));
-   
+
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    
+
     // Calculate the position of the mouse relative to the canvas
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
-   
+
     // Calculate the position of the mouse relative to the image at current zoom
     const imageX = (mouseX - offset.x) / zoom;
     const imageY = (mouseY - offset.y) / zoom;
@@ -155,7 +164,7 @@ const CustomMap = ({ targetPosition, onScore }) => {
       const maxOffsetY = 0;
       const minOffsetX = Math.min(0, rect.width - rect.width * newZoom);
       const minOffsetY = Math.min(0, rect.height - rect.height * newZoom);
-      
+
       newOffsetX = Math.max(minOffsetX, Math.min(maxOffsetX, newOffsetX));
       newOffsetY = Math.max(minOffsetY, Math.min(maxOffsetY, newOffsetY));
     }
@@ -190,8 +199,7 @@ const CustomMap = ({ targetPosition, onScore }) => {
       newOffsetX = Math.min(0, Math.max(newOffsetX, minOffsetX));
       newOffsetY = Math.min(0, Math.max(newOffsetY, minOffsetY));
 
-      if (zoom > 1)
-      {
+      if (zoom > 1) {
         setOffset({ x: newOffsetX, y: newOffsetY });
       }
     }
@@ -202,45 +210,123 @@ const CustomMap = ({ targetPosition, onScore }) => {
   };
 
 
+  const renderMap = () => (
+    <canvas 
+      ref={canvasRef} 
+      onClick={handleCanvasClick}
+      onWheel={handleWheel}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      style={{
+        width: '100%',
+        height: '100%',
+        cursor: isDragging ? 'grabbing' : 'grab'
+      }} 
+    />
+  );
+
   return (
-    <div style={{ width: '100%', height: '100%' }}>
-      <canvas 
-        ref={canvasRef} 
-        onClick={handleCanvasClick}
-        onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        style={{ width: '100%', height: '100%', cursor: isDragging ? 'grabbing' : 'grab' }} 
-      />
-      <button 
-        onClick={handleChooseClick} 
-        style={{ 
-          position: 'absolute', 
-          bottom: '10px', 
-          left: '50%', 
-          transform: 'translateX(-50%)',
-          zIndex: 10
-        }}
-      >
-        Choose
-      </button>
+    <>
       <div 
         style={{
-          position: 'absolute',
-          top: '10px',
-          left: '10px',
-          background: 'rgba(0, 0, 0, 0.5)',
-          color: 'white',
-          padding: '5px',
-          borderRadius: '5px',
-          fontSize: '12px',
-          zIndex: 10
+          position: 'relative',
+          width: isExpanded ? '1000px' : '400px',
+          height: 'auto',
+          transition: 'all 0.3s ease',
+          overflow: 'hidden'
         }}
+        onMouseEnter={() => setIsExpanded(true)}
+        onMouseLeave={() => setIsExpanded(false)}
       >
+        {renderMap()}
+        {isExpanded && !isFullScreen && (
+          <button
+            onClick={handleChooseClick}
+            style={{
+              position: 'absolute',
+              bottom: '15px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 10,
+              padding: '10px 20px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              backgroundColor: '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+              transition: 'background-color 0.3s ease'
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
+          >
+            Guess
+          </button>
+        )}
       </div>
-    </div>
+      {isFullScreen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            width: 'auto',
+            height: '80%',
+            backgroundColor: 'white',
+            borderRadius: '10px',
+            padding: '20px',
+            position: 'relative'
+          }}>
+            {renderMap()}
+            {score !== null && (
+              <div style={{
+                position: 'absolute',
+                bottom: '50px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                padding: '10px 20px',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                borderRadius: '5px',
+                fontSize: '35px',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+              }}>
+                Score: {score}
+              </div>
+            )}
+            <button
+              onClick={handleFullScreenClose}
+              style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                padding: '10px 20px',
+                fontSize: '16px',
+                backgroundColor: '#f44336',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -24,8 +24,8 @@ const GameScreen = ({ screenshotUrl, targetPosition }) => {
         position: 'absolute',
         bottom: '20px',
         right: '20px',
-        width: '800px',
-        height: 'auto',
+        // width: '800px',
+        // height: 'auto',
         // border: '2px solid white',
         borderRadius: '10px',
         overflow: 'hidden'
@@ -33,6 +33,7 @@ const GameScreen = ({ screenshotUrl, targetPosition }) => {
         <CustomMap 
           targetPosition={targetPosition}
           onScore={handleScore}
+          score={score}
         />
       </div>
 
