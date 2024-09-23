@@ -12,16 +12,11 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   useEffect(() => {
-    const img = new Image();
-    img.src = '/images/erangel.jpg'; 
-  }, []);
-
-  useEffect(() => {
     drawMap();
   }, [zoom, offset, userMarker, showActualMarker, isExpanded, isFullScreen]);
 
   const drawMap = () => {
-    if (!canvasRef.current) return; 
+    if (!canvasRef.current) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const img = new Image();
@@ -64,7 +59,7 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     setIsExpanded(false);
     onNextImage();
   };
-   
+
   const drawMarker = (ctx, x, y, color) => {
     ctx.beginPath();
     ctx.arc(x, y, 10 / zoom, 0, 2 * Math.PI);
@@ -92,7 +87,7 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
       return; // Empêche de placer un nouveau marqueur après avoir choisi
     }
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;    
+    const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
     const x = (event.clientX - rect.left) * scaleX;
@@ -127,20 +122,12 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     if (userMarker) {
       const distance = computeDistance(userMarker, targetPosition);
       const newScore = computeScore(distance);
-      onScore(newScore); 
+      onScore(newScore);
       setShowActualMarker(true);
       setIsFullScreen(true);
       setZoom(1);
       setOffset({ x: 0, y: 0 });
     }
-  };
-
-  const handleFullScreenClose = () => {
-    setIsFullScreen(false);
-    // setShowActualMarker(true);
-    setIsExpanded(false);
-    setZoom(1);
-    setOffset({ x: 0, y: 0 });
   };
 
   const handleWheel = (event) => {
@@ -222,8 +209,8 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
 
 
   const renderMap = () => (
-    <canvas 
-      ref={canvasRef} 
+    <canvas
+      ref={canvasRef}
       onClick={handleCanvasClick}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
@@ -234,13 +221,13 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
         width: '100%',
         height: '100%',
         cursor: isDragging ? 'grabbing' : 'grab'
-      }} 
+      }}
     />
   );
 
   return (
     <>
-      <div 
+      <div
         style={{
           position: 'relative',
           width: isExpanded ? '1000px' : '400px',
@@ -332,7 +319,7 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
                 cursor: 'pointer'
               }}
             >
-             Next 
+              Next
             </button>
           </div>
         </div>
