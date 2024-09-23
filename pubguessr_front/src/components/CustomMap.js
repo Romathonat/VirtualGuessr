@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 
-const CustomMap = ({ targetPosition, onScore, score }) => {
+const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
   const canvasRef = useRef(null);
   const [userMarker, setUserMarker] = useState(null);
   const [showActualMarker, setShowActualMarker] = useState(false);
@@ -54,6 +54,17 @@ const CustomMap = ({ targetPosition, onScore, score }) => {
     img.src = '/images/erangel.jpg';
   };
 
+
+  const handleNextImage = () => {
+    setUserMarker(null);
+    setShowActualMarker(false);
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
+    setIsFullScreen(false);
+    setIsExpanded(false);
+    onNextImage();
+  };
+   
   const drawMarker = (ctx, x, y, color) => {
     ctx.beginPath();
     ctx.arc(x, y, 10 / zoom, 0, 2 * Math.PI);
@@ -307,7 +318,7 @@ const CustomMap = ({ targetPosition, onScore, score }) => {
               </div>
             )}
             <button
-              onClick={handleFullScreenClose}
+              onClick={handleNextImage}
               style={{
                 position: 'absolute',
                 top: '10px',
@@ -321,7 +332,7 @@ const CustomMap = ({ targetPosition, onScore, score }) => {
                 cursor: 'pointer'
               }}
             >
-              Close
+             Next 
             </button>
           </div>
         </div>

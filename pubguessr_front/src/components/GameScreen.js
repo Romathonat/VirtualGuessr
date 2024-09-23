@@ -1,20 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CustomMap from './CustomMap';
 
-const GameScreen = ({ screenshotUrl, targetPosition }) => {
+const GameScreen = ({}) => {
+  const [currentImage, setCurrentImage] = useState(/* ... */);
   const [score, setScore] = useState(null);
   const [showResult, setShowResult] = useState(false);
+  const [targetPosition, setTargetPosition] = useState(/* ... */);
+  
+  const imageDict = [
+    { url: '/images/erangel_screen_1.jpg', position: { x: 700, y: 200 } },
+    { url: '/images/bunker.jpg', position: { x: 500, y: 300 } },
+    { url: '/images/Central-houses.jpg', position: { x: 700, y: 400 } },
+    { url: '/images/Ferry-Pier-Town.jpg', position: { x: 300, y: 600 } },
+    { url: '/images/garage.jpg', position: { x: 300, y: 600 } },
+  ];
+
+  useEffect(() => {
+    setTargetPosition(imageDict[0]["position"]);
+    setCurrentImage(imageDict[0]["url"])
+  }, []);
 
   const handleScore = (newScore) => {
     setScore(newScore);
     setShowResult(true);
   };
 
+  const handleNextImage = () => {
+    setCurrentImage(imageDict[1]["url"]);
+    setTargetPosition(imageDict[1]["position"]);
+  };
+
   return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
       {/* Grand screenshot */}
       <img 
-        src={screenshotUrl} 
+        src={currentImage} 
         alt="Game Screenshot" 
         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
       />
@@ -24,16 +44,14 @@ const GameScreen = ({ screenshotUrl, targetPosition }) => {
         position: 'absolute',
         bottom: '20px',
         right: '20px',
-        // width: '800px',
-        // height: 'auto',
-        // border: '2px solid white',
         borderRadius: '10px',
         overflow: 'hidden'
       }}>
         <CustomMap 
           targetPosition={targetPosition}
-          onScore={handleScore}
+          onScore={(newScore) => setScore(prevScore => prevScore + newScore)}
           score={score}
+          onNextImage={handleNextImage}
         />
       </div>
 
