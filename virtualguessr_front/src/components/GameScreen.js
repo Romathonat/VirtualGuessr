@@ -5,7 +5,7 @@ const GameScreen = ({}) => {
   const [score, setScore] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [key, setKey] = useState(0); // Nouvel état pour forcer le rafraîchissement
+  const [key, setKey] = useState(0); 
 
   const imageDict = [
     { url: '/images/erangel_screen_1.jpg', position: { x: 700, y: 200 } },
