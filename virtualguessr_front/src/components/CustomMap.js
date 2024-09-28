@@ -2,11 +2,11 @@ import React, { useRef, useEffect, useState } from 'react';
 
 const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
   const canvasRef = useRef(null);
-  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const [userMarker, setUserMarker] = useState(null);
   const [showActualMarker, setShowActualMarker] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [scale, setScale] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isExpanded, setIsExpanded] = useState(false);
@@ -25,9 +25,11 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     img.src = '/images/erangel.png';
 
     img.onload = () => {
-      setImageSize({ width: img.width, height: img.height });
+      let rect = canvas.getBoundingClientRect();
       canvas.width = img.width;
       canvas.height = img.height;
+
+      setScale({x: canvas.width / rect.width, y: canvas.height / rect.height})
 
       ctx.save();
       ctx.translate(offset.x, offset.y);
@@ -145,27 +147,24 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
 
-    // Calculate the position of the mouse relative to the image at current zoom
-    const imageX = (mouseX - offset.x) / zoom;
-    const imageY = (mouseY - offset.y) / zoom;
-
+    
     let newOffsetX, newOffsetY;
-
-    // Calculate new offsets to keep the point under the mouse in the same position
-    newOffsetX = mouseX - imageX * newZoom;
-    newOffsetY = mouseY - imageY * newZoom;
 
     // If zooming out to 1, center the image
     if (newZoom === 1) {
       newOffsetX = (rect.width - rect.width) / 2;
       newOffsetY = (rect.height - rect.height) / 2;
     } else {
+      // Calculate new offsets to keep the point under the mouse in the same position
+      newOffsetX = mouseX * scale.x;
+      newOffsetY = mouseY * scale.y;
+
       // Apply bounds to prevent white space
       const maxOffsetX = 0;
       const maxOffsetY = 0;
       const minOffsetX = Math.min(0, rect.width - rect.width * newZoom);
       const minOffsetY = Math.min(0, rect.height - rect.height * newZoom);
-
+      
       newOffsetX = Math.max(minOffsetX, Math.min(maxOffsetX, newOffsetX));
       newOffsetY = Math.max(minOffsetY, Math.min(maxOffsetY, newOffsetY));
     }
@@ -178,8 +177,8 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     if (event.button === 0) { // Left mouse button
       setIsDragging(true);
       setDragStart({
-        x: event.clientX - offset.x,
-        y: event.clientY - offset.y
+        x: event.clientX - offset.x / scale.x,
+        y: event.clientY - offset.y / scale.y
       });
     }
   };
@@ -187,14 +186,12 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
   const handleMouseMove = (event) => {
     if (isDragging) {
       const canvas = canvasRef.current;
-      const rect = canvas.getBoundingClientRect();
 
-      let newOffsetX = event.clientX - dragStart.x;
-      let newOffsetY = event.clientY - dragStart.y;
+      let newOffsetX = (event.clientX - dragStart.x) * scale.x;
+      let newOffsetY = (event.clientY - dragStart.y) * scale.y;
 
-      // Calculer les limites de déplacement
-      const minOffsetX = rect.width - rect.width * zoom;
-      const minOffsetY = rect.height - rect.height * zoom;
+      const minOffsetX = canvas.width - canvas.width * zoom;
+      const minOffsetY = canvas.height - canvas.height * zoom;
 
       // Appliquer les limites
       newOffsetX = Math.min(0, Math.max(newOffsetX, minOffsetX));
