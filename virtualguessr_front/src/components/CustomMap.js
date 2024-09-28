@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 
 const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
   const canvasRef = useRef(null);
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const [userMarker, setUserMarker] = useState(null);
   const [showActualMarker, setShowActualMarker] = useState(false);
   const [zoom, setZoom] = useState(1);
@@ -10,6 +11,7 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isExpanded, setIsExpanded] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+
 
   useEffect(() => {
     drawMap();
@@ -20,8 +22,10 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const img = new Image();
+    img.src = '/images/erangel.png';
 
     img.onload = () => {
+      setImageSize({ width: img.width, height: img.height });
       canvas.width = img.width;
       canvas.height = img.height;
 
@@ -46,7 +50,6 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
       ctx.restore();
     };
 
-    img.src = '/images/erangel.jpg';
   };
 
 
@@ -62,11 +65,11 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
 
   const drawMarker = (ctx, x, y, color) => {
     ctx.beginPath();
-    ctx.arc(x, y, 10 / zoom, 0, 2 * Math.PI);
+    ctx.arc(x, y, 50 / zoom, 0, 2 * Math.PI);
     ctx.fillStyle = color;
     ctx.fill();
     ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2 / zoom;
+    ctx.lineWidth = 10 / zoom;
     ctx.stroke();
   };
 
@@ -132,7 +135,7 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
 
   const handleWheel = (event) => {
     event.preventDefault();
-    const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1;
+    const zoomFactor = event.deltaY > 0 ? 0.7 : 1.3;
     const newZoom = Math.max(1, Math.min(5, zoom * zoomFactor));
 
     const canvas = canvasRef.current;
