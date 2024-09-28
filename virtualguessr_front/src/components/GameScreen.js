@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import CustomMap from './CustomMap';
 
 const GameScreen = ({}) => {
-  const [score, setScore] = useState(null);
-  const [showResult, setShowResult] = useState(false);
+  const [globalScore, setGlobalScore] = useState(0);
+  const [score, setScore] = useState(0);
+  const [showResult, setShowResult] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [key, setKey] = useState(0); 
 
@@ -20,6 +21,11 @@ const GameScreen = ({}) => {
     const nextIndex = (currentIndex + 1) % imageDict.length;
     setCurrentIndex(nextIndex);
     setKey(prevKey => prevKey + 1);
+  };
+
+  const handleScore = (newScore) => {
+    setScore(newScore);
+    setGlobalScore(globalScore + newScore);
   };
 
   return (
@@ -42,7 +48,7 @@ const GameScreen = ({}) => {
         <CustomMap 
           key={key} 
           targetPosition={imageDict[currentIndex].position}
-          onScore={(newScore) => setScore(prevScore => prevScore + newScore)}
+          onScore={handleScore}
           score={score}
           onNextImage={handleNextImage}
         />
@@ -59,7 +65,7 @@ const GameScreen = ({}) => {
           padding: '10px',
           borderRadius: '5px'
         }}>
-          Score: {score}
+          Score: {globalScore}
         </div>
       )}
     </div>
