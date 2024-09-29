@@ -32,6 +32,7 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
       setScale({x: canvas.width / rect.width, y: canvas.height / rect.height})
 
       ctx.save();
+
       ctx.translate(offset.x, offset.y);
       ctx.scale(zoom, zoom);
 
@@ -155,18 +156,17 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
       newOffsetX = (rect.width - rect.width) / 2;
       newOffsetY = (rect.height - rect.height) / 2;
     } else {
-      // Calculate new offsets to keep the point under the mouse in the same position
-      newOffsetX = mouseX * scale.x;
-      newOffsetY = mouseY * scale.y;
+      newOffsetX = offset.x + (mouseX * zoom - mouseX) * scale.x - (mouseX * newZoom  - mouseX) * scale.x;
+      newOffsetY = offset.y + (mouseY * zoom - mouseY) * scale.x - (mouseY * newZoom - mouseY) * scale.y;
 
       // Apply bounds to prevent white space
-      const maxOffsetX = 0;
-      const maxOffsetY = 0;
-      const minOffsetX = Math.min(0, rect.width - rect.width * newZoom);
-      const minOffsetY = Math.min(0, rect.height - rect.height * newZoom);
+      // const maxOffsetX = 0;
+      // const maxOffsetY = 0;
+      // const minOffsetX = Math.min(0, rect.width - rect.width * newZoom);
+      // const minOffsetY = Math.min(0, rect.height - rect.height * newZoom);
       
-      newOffsetX = Math.max(minOffsetX, Math.min(maxOffsetX, newOffsetX));
-      newOffsetY = Math.max(minOffsetY, Math.min(maxOffsetY, newOffsetY));
+      // newOffsetX = Math.max(minOffsetX, Math.min(maxOffsetX, newOffsetX));
+      // newOffsetY = Math.max(minOffsetY, Math.min(maxOffsetY, newOffsetY));
     }
 
     setZoom(newZoom);
