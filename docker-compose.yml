@@ -8,5 +8,5 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./virtualguessr_back/db:/app
+      - ./virtualguessr_back/db:/virtualguessr_back/db
     # command: uvicorn main:app --host 0.0.0.0 --reload
