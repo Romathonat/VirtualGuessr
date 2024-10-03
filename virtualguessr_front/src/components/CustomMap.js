@@ -79,11 +79,11 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
 
   const drawDashedLine = (ctx, start, end) => {
     ctx.beginPath();
-    ctx.setLineDash([5 / zoom, 5 / zoom]);
+    ctx.setLineDash([30 / zoom, 30 / zoom]);
     ctx.moveTo(start.x, start.y);
     ctx.lineTo(end.x, end.y);
     ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2 / zoom;
+    ctx.lineWidth = 20 / zoom;
     ctx.stroke();
     ctx.setLineDash([]);
   };
