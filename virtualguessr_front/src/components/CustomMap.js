@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useState } from 'react';
 const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
   const canvasRef = useRef(null);
   const [userMarker, setUserMarker] = useState(null);
+  const [scaledPosition, setScaledPosition] = useState({ x: 0, y: 0 });
   const [showActualMarker, setShowActualMarker] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -24,6 +25,13 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     };
   }, [zoom, offset, userMarker, showActualMarker, isExpanded, isFullScreen]);
 
+  useEffect(() => {
+    setScaledPosition({
+      x: targetPosition.x * scale.x,
+      y: targetPosition.y * scale.y
+    });
+  }, [targetPosition, scale]);
+  
   const drawMap = () => {
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
@@ -37,9 +45,6 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
       canvas.height = img.height;
 
       setScale({x: canvas.width / rect.width, y: canvas.height / rect.height})
-      targetPosition.x = targetPosition.x * scale.x;
-      targetPosition.y = targetPosition.y * scale.y;
-
 
       ctx.save();
       ctx.translate(offset.x, offset.y);
@@ -50,11 +55,11 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
         drawMarker(ctx, userMarker.x, userMarker.y, 'red');
       }
 
-      if (showActualMarker && targetPosition) {
-        drawMarker(ctx, targetPosition.x, targetPosition.y, 'green');
+      if (showActualMarker && scaledPosition) {
+        drawMarker(ctx, scaledPosition.x, scaledPosition.y, 'green');
 
         if (userMarker) {
-          drawDashedLine(ctx, userMarker, targetPosition);
+          drawDashedLine(ctx, userMarker, scaledPosition);
         }
       }
 
@@ -124,6 +129,10 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
 
 
   const computeDistance = (point1, point2) => {
+    console.log("point1"+point1.x);
+    console.log("point1"+point1.y);
+    console.log("point2"+point2.x);
+    console.log("point2"+point2.y);
     const dx = point1.x - point2.x;
     const dy = point1.y - point2.y;
     return Math.sqrt(dx * dx + dy * dy);
@@ -141,7 +150,7 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
 
   const handleChooseClick = () => {
     if (userMarker) {
-      const distance = computeDistance(userMarker, targetPosition);
+      const distance = computeDistance(userMarker, scaledPosition);
       const newScore = computeScore(distance);
       onScore(newScore);
       setShowActualMarker(true);
