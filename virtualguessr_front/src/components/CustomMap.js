@@ -16,6 +16,12 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
 
   useEffect(() => {
     drawMap();
+    
+    window.addEventListener('keydown', handleKeyDown);
+  
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [zoom, offset, userMarker, showActualMarker, isExpanded, isFullScreen]);
 
   const drawMap = () => {
@@ -31,12 +37,13 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
       canvas.height = img.height;
 
       setScale({x: canvas.width / rect.width, y: canvas.height / rect.height})
+      targetPosition.x = targetPosition.x * scale.x;
+      targetPosition.y = targetPosition.y * scale.y;
+
 
       ctx.save();
-
       ctx.translate(offset.x, offset.y);
       ctx.scale(zoom, zoom);
-
       ctx.drawImage(img, 0, 0);
 
       if (userMarker) {
@@ -86,6 +93,12 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     ctx.lineWidth = 20 / zoom;
     ctx.stroke();
     ctx.setLineDash([]);
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Escape' && isFullScreen) {
+      handleNextImage();
+    }
   };
 
   const handleCanvasClick = (event) => {
@@ -160,6 +173,15 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     } else {
       newOffsetX = offset.x + (mouseX * zoom - mouseX) * scale.x - (mouseX * newZoom  - mouseX) * scale.x;
       newOffsetY = offset.y + (mouseY * zoom - mouseY) * scale.x - (mouseY * newZoom - mouseY) * scale.y;
+
+      // Appliquer les limites
+      const minOffsetX = canvas.width - canvas.width * newZoom;
+      const minOffsetY = canvas.height - canvas.height * newZoom;
+
+      // Appliquer les limites
+      newOffsetX = Math.min(0, Math.max(newOffsetX, minOffsetX));
+      newOffsetY = Math.min(0, Math.max(newOffsetY, minOffsetY));
+
     }
 
     setZoom(newZoom);
