@@ -17,9 +17,9 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
 
   useEffect(() => {
     drawMap();
-    
+
     window.addEventListener('keydown', handleKeyDown);
-  
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
@@ -31,7 +31,7 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
       y: targetPosition.y * scale.y
     });
   }, [targetPosition, scale]);
-  
+
   const drawMap = () => {
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
@@ -44,7 +44,7 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
       canvas.width = img.width;
       canvas.height = img.height;
 
-      setScale({x: canvas.width / rect.width, y: canvas.height / rect.height})
+      setScale({ x: canvas.width / rect.width, y: canvas.height / rect.height })
 
       ctx.save();
       ctx.translate(offset.x, offset.y);
@@ -68,17 +68,6 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
 
   };
 
-
-  const handleNextImage = () => {
-    setUserMarker(null);
-    setShowActualMarker(false);
-    setZoom(1);
-    setOffset({ x: 0, y: 0 });
-    setIsFullScreen(false);
-    setIsExpanded(false);
-    onNextImage();
-  };
-
   const drawMarker = (ctx, x, y, color) => {
     ctx.beginPath();
     ctx.arc(x, y, 50 / zoom, 0, 2 * Math.PI);
@@ -100,6 +89,36 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     ctx.setLineDash([]);
   };
 
+  const computeDistance = (point1, point2) => {
+    console.log("point1" + point1.x);
+    console.log("point1" + point1.y);
+    console.log("point2" + point2.x);
+    console.log("point2" + point2.y);
+    const dx = point1.x - point2.x;
+    const dy = point1.y - point2.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const computeScore = (distance) => {
+    const maxScore = 5000;
+    const maxDistance = Math.sqrt(canvasRef.current.width * canvasRef.current.width + canvasRef.current.height * canvasRef.current.height);
+
+    const normalizedDistance = distance / maxDistance;
+    const score = maxScore * Math.exp(-5 * normalizedDistance);
+
+    return Math.round(score);
+  };
+
+  const handleNextImage = () => {
+    setUserMarker(null);
+    setShowActualMarker(false);
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
+    setIsFullScreen(false);
+    setIsExpanded(false);
+    onNextImage();
+  };
+
   const handleKeyDown = (event) => {
     if (event.key === 'Escape' && isFullScreen) {
       handleNextImage();
@@ -110,7 +129,7 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     const canvas = canvasRef.current;
     if (showActualMarker || !canvas || hasDragged) {
       setHasDragged(false);
-      return; 
+      return;
     }
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
@@ -126,27 +145,6 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     setHasDragged(false);
   };
 
-
-
-  const computeDistance = (point1, point2) => {
-    console.log("point1"+point1.x);
-    console.log("point1"+point1.y);
-    console.log("point2"+point2.x);
-    console.log("point2"+point2.y);
-    const dx = point1.x - point2.x;
-    const dy = point1.y - point2.y;
-    return Math.sqrt(dx * dx + dy * dy);
-  };
-
-  const computeScore = (distance) => {
-    const maxScore = 5000;
-    const maxDistance = Math.sqrt(canvasRef.current.width * canvasRef.current.width + canvasRef.current.height * canvasRef.current.height);
-
-    const normalizedDistance = distance / maxDistance;
-    const score = maxScore * Math.exp(-5 * normalizedDistance);
-
-    return Math.round(score);
-  };
 
   const handleChooseClick = () => {
     if (userMarker) {
@@ -172,7 +170,7 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
 
-    
+
     let newOffsetX, newOffsetY;
 
     // If zooming out to 1, center the image
@@ -180,7 +178,7 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
       newOffsetX = (rect.width - rect.width) / 2;
       newOffsetY = (rect.height - rect.height) / 2;
     } else {
-      newOffsetX = offset.x + (mouseX * zoom - mouseX) * scale.x - (mouseX * newZoom  - mouseX) * scale.x;
+      newOffsetX = offset.x + (mouseX * zoom - mouseX) * scale.x - (mouseX * newZoom - mouseX) * scale.x;
       newOffsetY = offset.y + (mouseY * zoom - mouseY) * scale.x - (mouseY * newZoom - mouseY) * scale.y;
 
       // Appliquer les limites
@@ -232,7 +230,6 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
   const handleMouseUp = () => {
     setIsDragging(false);
   };
-
 
   const renderMap = () => (
     <canvas

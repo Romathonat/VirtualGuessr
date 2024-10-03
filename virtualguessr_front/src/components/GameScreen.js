@@ -16,7 +16,6 @@ const GameScreen = ({}) => {
     { url: '/images/garage.jpg', position: { x: 300, y: 600 } },
   ];
 
-
   const handleNextImage = () => {
     const nextIndex = (currentIndex + 1) % imageDict.length;
     setCurrentIndex(nextIndex);
