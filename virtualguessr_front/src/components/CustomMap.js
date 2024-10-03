@@ -8,6 +8,7 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [hasDragged, setHasDragged] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isExpanded, setIsExpanded] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -89,8 +90,9 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
 
   const handleCanvasClick = (event) => {
     const canvas = canvasRef.current;
-    if (showActualMarker || !canvas) {
-      return; // Empêche de placer un nouveau marqueur après avoir choisi
+    if (showActualMarker || !canvas || hasDragged) {
+      setHasDragged(false);
+      return; 
     }
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
@@ -99,11 +101,11 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     const x = (event.clientX - rect.left) * scaleX;
     const y = (event.clientY - rect.top) * scaleY;
 
-    // Appliquer le zoom et l'offset inverse pour obtenir la position réelle sur l'image
     const imageX = (x - offset.x) / zoom;
     const imageY = (y - offset.y) / zoom;
 
     setUserMarker({ x: imageX, y: imageY });
+    setHasDragged(false);
   };
 
 
@@ -158,15 +160,6 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     } else {
       newOffsetX = offset.x + (mouseX * zoom - mouseX) * scale.x - (mouseX * newZoom  - mouseX) * scale.x;
       newOffsetY = offset.y + (mouseY * zoom - mouseY) * scale.x - (mouseY * newZoom - mouseY) * scale.y;
-
-      // Apply bounds to prevent white space
-      // const maxOffsetX = 0;
-      // const maxOffsetY = 0;
-      // const minOffsetX = Math.min(0, rect.width - rect.width * newZoom);
-      // const minOffsetY = Math.min(0, rect.height - rect.height * newZoom);
-      
-      // newOffsetX = Math.max(minOffsetX, Math.min(maxOffsetX, newOffsetX));
-      // newOffsetY = Math.max(minOffsetY, Math.min(maxOffsetY, newOffsetY));
     }
 
     setZoom(newZoom);
@@ -186,6 +179,8 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
   const handleMouseMove = (event) => {
     if (isDragging) {
       const canvas = canvasRef.current;
+
+      setHasDragged(true);
 
       let newOffsetX = (event.clientX - dragStart.x) * scale.x;
       let newOffsetY = (event.clientY - dragStart.y) * scale.y;
