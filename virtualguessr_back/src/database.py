@@ -1,11 +1,9 @@
+import os
 import sqlite3
 from pathlib import Path
 
-# Chemin de la base de données
-DB_PATH = Path(__file__).parent.parent / "db" / "images.db"
-
-# Chemin du dossier des images
-IMAGES_FOLDER = Path(__file__).parent.parent / "images"
+DB_PATH = Path("/virtualguessr_back/data/virtualguessr.db")
+IMAGES_FOLDER = Path("/virtualguessr_back/images")
 
 
 def get_db():
@@ -20,29 +18,39 @@ def init_db():
     CREATE TABLE IF NOT EXISTS images (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         filename TEXT NOT NULL UNIQUE,
-        path TEXT NOT NULL
+        data BLOB NOT NULL
     )
     """)
-    conn.commit()
-    conn.close()
 
+    for filename in os.listdir(IMAGES_FOLDER):
+        if filename.lower().endswith((".png", ".jpg", ".jpeg", ".gif")):
+            file_path = IMAGES_FOLDER / filename
+            with open(file_path, "rb") as file:
+                blob_data = file.read()
+            try:
+                conn.execute(
+                    "INSERT OR REPLACE INTO images (filename, data) VALUES (?, ?)",
+                    (filename, blob_data),
+                )
+            except sqlite3.IntegrityError:
+                print(f"Erreur lors de l'insertion de l'image {filename}")
 
-def add_image(filename, path):
-    conn = get_db()
-    conn.execute("INSERT INTO images (filename, path) VALUES (?, ?)", (filename, path))
     conn.commit()
     conn.close()
 
 
 def get_random_image():
     conn = get_db()
-    result = conn.execute("SELECT * FROM images ORDER BY RANDOM() LIMIT 1").fetchone()
+    result = conn.execute(
+        "SELECT filename, data FROM images ORDER BY RANDOM() LIMIT 1"
+    ).fetchone()
     conn.close()
     return result if result else None
 
 
-# Assurez-vous que le dossier images existe
-IMAGES_FOLDER.mkdir(exist_ok=True)
+# Assurez-vous que les dossiers nécessaires existent
+DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+IMAGES_FOLDER.mkdir(parents=True, exist_ok=True)
 
 # Initialiser la base de données au démarrage
 init_db()

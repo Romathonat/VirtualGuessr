@@ -1,31 +1,28 @@
-import shutil
+from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException, Response
 
-from src.database import IMAGES_FOLDER, add_image, get_random_image
-
-app = FastAPI()
+from src.database import get_random_image, init_db
 
 
-@app.post("/upload")
-async def upload_image(file: UploadFile = File(...)):
-    file_path = IMAGES_FOLDER / file.filename
-    try:
-        with file_path.open("wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        add_image(file.filename, str(file_path))
-        return {"filename": file.filename, "status": "uploaded"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/random-image")
 async def get_image():
     image = get_random_image()
     if image:
-        return FileResponse(image["path"])
-    raise HTTPException(status_code=404, detail="No images found")
+        return Response(
+            content=image["data"],
+            media_type=f"image/{image['filename'].split('.')[-1]}",
+        )
+    raise HTTPException(status_code=404, detail="Aucune image trouvée")
 
 
 @app.get("/")
