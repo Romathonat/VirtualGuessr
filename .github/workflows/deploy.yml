@@ -18,14 +18,18 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         known_hosts: ${{ secrets.KNOWN_HOSTS }}
 
-    - name: Deploy to VPS
-      env:
-        HOST: ${{ secrets.HOST }}
-        USER: ${{ secrets.USER }}
+    - name: Deploy with rsync
       run: |
-        ssh $USER@$HOST << EOF
-          cd /chemin/vers/votre/projet
-          git pull origin main
+        rsync -avz --delete \
+          --exclude='.git/' \
+          --exclude='.github/' \
+          --exclude='node_modules/' \
+          ./ ${{ secrets.USER }}@${{ secrets.HOST }}:/opt/virtualguessr
+
+    - name: Execute remote commands
+      run: |
+        ssh ${{ secrets.USER }}@${{ secrets.HOST }} << EOF
+          cd /virtualguessr
           docker compose down
           docker compose up -d --build
         EOF
