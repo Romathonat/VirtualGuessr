@@ -37,7 +37,7 @@ const CustomMap = ({ targetPosition, onScore, score, onNextImage }) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const img = new Image();
-    img.src = '/images/erangel.png';
+    img.src = '/images/erangel.jpg';
 
     img.onload = () => {
       let rect = canvas.getBoundingClientRect();
