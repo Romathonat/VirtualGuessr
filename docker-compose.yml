@@ -7,12 +7,6 @@ services:
       - "8000"
     volumes:
       - ./virtualguessr_back/data:/virtualguessr_back/data
-  frontend:
-    build:
-      context: ./virtualguessr_front
-      dockerfile: Dockerfile
-    volumes:
-      - frontend_build:/app/build
   nginx:
     build:
       context: ./nginx
@@ -21,9 +15,8 @@ services:
       - "80:80"
     depends_on:
       - backend
-      - frontend
     volumes:
-      - frontend_build:/usr/share/nginx/html
+      - ./virtualguessr_front/build:/usr/share/nginx/html
     environment:
       - BACKEND_URL=http://backend:8000
 
