@@ -8,11 +8,35 @@ const GameScreen = () => {
   const [showResult, setShowResult] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [key, setKey] = useState(0);
+  const [hfov, setHfov] = useState(50);
+  const [vaov, setVaov] = useState(38);
 
   const panoramas = [
     { url: '/images/equirectangular_cylindrical.jpg', position: { x: 700, y: 200 } },
     // Ajoutez d'autres panoramas si nécessaire
   ];
+
+  useEffect(() => {
+    const calculateFOV = () => {
+      const aspectRatio = window.innerWidth / window.innerHeight;
+      const baseAspectRatio = 16 / 9;
+      
+      if (aspectRatio > baseAspectRatio) {
+        // Écran plus large que 16:9
+        setHfov(50 * (aspectRatio / baseAspectRatio));
+        setVaov(38);
+      } else {
+        // Écran plus étroit que 16:9
+        setHfov(50);
+        setVaov(38 / (aspectRatio / baseAspectRatio));
+      }
+    };
+
+    calculateFOV();
+    window.addEventListener('resize', calculateFOV);
+    
+    return () => window.removeEventListener('resize', calculateFOV);
+  }, []);
 
   const handleNextImage = () => {
     const nextIndex = (currentIndex + 1) % panoramas.length;
@@ -27,26 +51,21 @@ const GameScreen = () => {
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
-      {/* Visualisation 360° cylindrique */}
       <Pannellum
         width="100%"
         height="100%"
         image={panoramas[currentIndex].url}
         avoidShowingBackground={true}
-        type= {"multires"}
-        hfov={10}
-        vaov={60.0}
+        type="equirectangular"
+        hfov={hfov}
+        vaov={vaov}
         minPitch={-19}
         maxPitch={19}
         pitch={0}
-        
         autoLoad
         compass={false}
         showZoomCtrl={false}
-        mouseZoom={true}
-        onLoad={() => {
-          console.log("panorama loaded");
-        }}
+        mouseZoom={false}
         hotspotDebug={false}
       >
         {/* Vous pouvez ajouter des hotspots ici si nécessaire */}
@@ -68,7 +87,6 @@ const GameScreen = () => {
           onNextImage={handleNextImage}
         />
       </div>
-
       {/* Affichage du score */}
       {showResult && (
         <div style={{
