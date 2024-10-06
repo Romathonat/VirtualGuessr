@@ -1,23 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { Pannellum } from "pannellum-react";
 import CustomMap from './CustomMap';
 
-const GameScreen = ({}) => {
+const GameScreen = () => {
   const [globalScore, setGlobalScore] = useState(0);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [key, setKey] = useState(0); 
+  const [key, setKey] = useState(0);
 
-  const imageDict = [
-    { url: '/images/erangel_screen_1.jpg', position: { x: 700, y: 200 } },
-    { url: '/images/bunker.jpg', position: { x: 500, y: 300 } },
-    { url: '/images/Central-houses.jpg', position: { x: 700, y: 400 } },
-    { url: '/images/Ferry-Pier-Town.jpg', position: { x: 300, y: 600 } },
-    { url: '/images/garage.jpg', position: { x: 300, y: 600 } },
+  const panoramas = [
+    { url: '/images/equirectangular_cylindrical.jpg', position: { x: 700, y: 200 } },
+    // Ajoutez d'autres panoramas si nécessaire
   ];
 
   const handleNextImage = () => {
-    const nextIndex = (currentIndex + 1) % imageDict.length;
+    const nextIndex = (currentIndex + 1) % panoramas.length;
     setCurrentIndex(nextIndex);
     setKey(prevKey => prevKey + 1);
   };
@@ -29,13 +27,31 @@ const GameScreen = ({}) => {
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
-      {/* Grand screenshot */}
-      <img 
-        src={imageDict[currentIndex].url} 
-        alt="Game Screenshot" 
-        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-      />
-      
+      {/* Visualisation 360° cylindrique */}
+      <Pannellum
+        width="100%"
+        height="100%"
+        image={panoramas[currentIndex].url}
+        avoidShowingBackground={true}
+        type= {"multires"}
+        hfov={10}
+        vaov={60.0}
+        minPitch={-19}
+        maxPitch={19}
+        pitch={0}
+        
+        autoLoad
+        compass={false}
+        showZoomCtrl={false}
+        mouseZoom={true}
+        onLoad={() => {
+          console.log("panorama loaded");
+        }}
+        hotspotDebug={false}
+      >
+        {/* Vous pouvez ajouter des hotspots ici si nécessaire */}
+      </Pannellum>
+     
       {/* Minimap dans le coin inférieur droit */}
       <div style={{
         position: 'absolute',
@@ -44,9 +60,9 @@ const GameScreen = ({}) => {
         borderRadius: '10px',
         overflow: 'hidden'
       }}>
-        <CustomMap 
-          key={key} 
-          targetPosition={imageDict[currentIndex].position}
+        <CustomMap
+          key={key}
+          targetPosition={panoramas[currentIndex].position}
           onScore={handleScore}
           score={score}
           onNextImage={handleNextImage}
