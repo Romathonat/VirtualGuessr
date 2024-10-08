@@ -96,20 +96,6 @@ def scroll_mouse(direction):
     win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, direction * 120, 0)
 
 
-def capture_horizontal_360(hwnd, num_captures=5, delay=0.5):
-    captured_images = []
-    mouse_move = 1800
-    for i in range(num_captures):
-        image = capture_window(hwnd)
-        filename = f"360_captures/horizontal_{i}.jpg"
-        cv2.imwrite(filename, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
-        captured_images.append(filename)
-        print(f"Image horizontale {i+1}/{num_captures} capturée")
-        move_mouse(mouse_move, 0)
-        time.sleep(delay)
-    return captured_images
-
-
 def generate_cylindrical_equirectangular(captured_images, capture_number):
     images = [cv2.imread(img) for img in captured_images]
     height, width = images[0].shape[:2]
@@ -122,14 +108,35 @@ def generate_cylindrical_equirectangular(captured_images, capture_number):
         equirectangular[:, i * width : (i + 1) * width] = img
     equirectangular = equirectangular[:, :-3438]
 
-    cv2.imwrite(f"360_captures/equirectangular_{capture_number}.jpg", equirectangular)
+    equirectangular_filename = f"360_captures/equirectangular_{capture_number}.jpg"
+    cv2.imwrite(equirectangular_filename, equirectangular)
     print(
-        f"Image équirectangulaire cylindrique générée et sauvegardée comme '360_captures/equirectangular_{capture_number}.jpg'."
+        f"Image équirectangulaire cylindrique générée et sauvegardée comme '{equirectangular_filename}'."
     )
     print(
         f"Dimensions de l'image : {equirectangular.shape[1]}x{equirectangular.shape[0]}"
     )
+
+    # Suppression des images individuelles
+    for img_path in captured_images:
+        os.remove(img_path)
+        print(f"Image supprimée : {img_path}")
+
     return equirectangular
+
+
+def capture_horizontal_360(hwnd, num_captures=5, delay=0.5):
+    captured_images = []
+    mouse_move = 1800
+    for i in range(num_captures):
+        image = capture_window(hwnd)
+        filename = f"360_captures/horizontal_{i}.jpg"
+        cv2.imwrite(filename, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+        captured_images.append(filename)
+        print(f"Image horizontale {i+1}/{num_captures} capturée")
+        move_mouse(mouse_move, 0)
+        time.sleep(delay)
+    return captured_images
 
 
 def get_next_capture_number():

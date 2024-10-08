@@ -80,7 +80,7 @@ class LocationPicker:
             writer = csv.writer(csvfile)
             if not file_exists:
                 writer.writerow(["image_id", "position_x", "position_y"])
-            writer.writerow([image_id, x, y])
+            writer.writerow([f"{image_id}", x, y])
 
 
 if __name__ == "__main__":
