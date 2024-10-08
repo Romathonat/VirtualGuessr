@@ -12,7 +12,7 @@ const GameScreen = () => {
   const [vaov, setVaov] = useState(38);
 
   const panoramas = [
-    { url: '/images/equirectangular_cylindrical.jpg', position: { x: 700, y: 200 } },
+    { url: '/images/equirectangular_cylindrical.jpg', position: { x: 4100, y: 4100} },
     // Ajoutez d'autres panoramas si nécessaire
   ];
 
