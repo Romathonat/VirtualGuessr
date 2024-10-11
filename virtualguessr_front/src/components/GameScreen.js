@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef} from 'react';
 import { Pannellum } from "pannellum-react";
 import { Mail } from "lucide-react";
 import CustomMap from './CustomMap';
@@ -13,6 +13,7 @@ const GameScreen = () => {
   const [hfov, setHfov] = useState(50);
   const [vaov, setVaov] = useState(38);
   const [showNewsletterForm, setShowNewsletterForm] = useState(false);
+  const timeoutRef = useRef(null);
 
   const panoramas = [
     { url: '/images/13.jpg', position: { x: 6294, y: 3973} },
@@ -60,6 +61,17 @@ const GameScreen = () => {
     setGlobalScore(globalScore + newScore);
   };
 
+  const handleMouseEnter = () => {
+    clearTimeout(timeoutRef.current);
+    setShowNewsletterForm(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setShowNewsletterForm(false);
+    }, 500); // 500ms de délai avant de cacher le formulaire
+  };
+
  return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <Pannellum
@@ -79,8 +91,7 @@ const GameScreen = () => {
         mouseZoom={false}
         hotspotDebug={false}
       />
-
-      {/* Icône de mail et formulaire de newsletter */}
+{/* Icône de mail et formulaire de newsletter */}
       <div 
         style={{
           position: 'absolute',
@@ -88,8 +99,8 @@ const GameScreen = () => {
           right: '20px',
           zIndex: 1000,
         }}
-        onMouseEnter={() => setShowNewsletterForm(true)}
-        onMouseLeave={() => setShowNewsletterForm(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         <Mail 
           size={32} 
@@ -101,20 +112,25 @@ const GameScreen = () => {
             borderRadius: '50%'
           }} 
         />
-        {showNewsletterForm && (
-          <div style={{
+        <div
+          style={{
             position: 'absolute',
             top: '100%',
             right: 0,
-            background: 'white',
+            background: 'rgb(240, 233, 213)',
             padding: '20px',
             borderRadius: '10px',
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
             width: '300px',
-          }}>
-            <NewsletterSignup />
-          </div>
-        )}
+            transition: 'all 0.3s ease',
+            opacity: showNewsletterForm ? 1 : 0,
+            visibility: showNewsletterForm ? 'visible' : 'hidden',
+            transform: `translateY(${showNewsletterForm ? '0' : '-10px'})`,
+            pointerEvents: showNewsletterForm ? 'auto' : 'none',
+          }}
+        >
+          <NewsletterSignup />
+        </div>
       </div>
 
       {/* Minimap dans le coin inférieur droit */}
