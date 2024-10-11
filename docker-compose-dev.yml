@@ -1,0 +1,25 @@
+services:
+  backend:
+    build: 
+      context: ./virtualguessr_back
+      dockerfile: Dockerfile
+    expose:
+      - "8000"
+    volumes:
+      - ./virtualguessr_back/data:/virtualguessr_back/data
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile-dev
+    ports:
+      - "80:80"
+    restart: always
+    depends_on:
+      - backend
+    volumes:
+      - ./virtualguessr_front/build:/usr/share/nginx/html
+    environment:
+      - BACKEND_URL=http://backend:8000
+
+  
