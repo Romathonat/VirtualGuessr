@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Pannellum } from "pannellum-react";
+import { Mail } from "lucide-react";
 import CustomMap from './CustomMap';
+import NewsletterSignup from './NewsletterSignup';
 
 const GameScreen = () => {
   const [globalScore, setGlobalScore] = useState(0);
@@ -10,6 +12,7 @@ const GameScreen = () => {
   const [key, setKey] = useState(0);
   const [hfov, setHfov] = useState(50);
   const [vaov, setVaov] = useState(38);
+  const [showNewsletterForm, setShowNewsletterForm] = useState(false);
 
   const panoramas = [
     { url: '/images/13.jpg', position: { x: 6294, y: 3973} },
@@ -57,7 +60,7 @@ const GameScreen = () => {
     setGlobalScore(globalScore + newScore);
   };
 
-  return (
+ return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <Pannellum
         width="100%"
@@ -75,10 +78,45 @@ const GameScreen = () => {
         showZoomCtrl={false}
         mouseZoom={false}
         hotspotDebug={false}
+      />
+
+      {/* Icône de mail et formulaire de newsletter */}
+      <div 
+        style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          zIndex: 1000,
+        }}
+        onMouseEnter={() => setShowNewsletterForm(true)}
+        onMouseLeave={() => setShowNewsletterForm(false)}
       >
-        {/* Vous pouvez ajouter des hotspots ici si nécessaire */}
-      </Pannellum>
-     
+        <Mail 
+          size={32} 
+          color="white" 
+          style={{ 
+            cursor: 'pointer',
+            background: 'rgba(0,0,0,0.5)',
+            padding: '5px',
+            borderRadius: '50%'
+          }} 
+        />
+        {showNewsletterForm && (
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            right: 0,
+            background: 'white',
+            padding: '20px',
+            borderRadius: '10px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            width: '300px',
+          }}>
+            <NewsletterSignup />
+          </div>
+        )}
+      </div>
+
       {/* Minimap dans le coin inférieur droit */}
       <div style={{
         position: 'absolute',
@@ -95,6 +133,7 @@ const GameScreen = () => {
           onNextImage={handleNextImage}
         />
       </div>
+
       {/* Affichage du score */}
       {showResult && (
         <div style={{
@@ -113,4 +152,4 @@ const GameScreen = () => {
   );
 };
 
-export default GameScreen;
+export default GameScreen; 
