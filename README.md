@@ -9,3 +9,9 @@ To launch front as dev, go to virtualguessr_front, and:
 ```
 npm start
 ```
+
+To export libs for backend:
+
+```
+pdm export --no-hashes -f requirements -o requirements.txt
+```

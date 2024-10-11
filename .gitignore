@@ -25,3 +25,4 @@ yarn-error.log*
 
 scripts/images/
 scripts/positions.csv
+.env

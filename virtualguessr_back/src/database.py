@@ -52,5 +52,3 @@ def get_random_image():
 DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 IMAGES_FOLDER.mkdir(parents=True, exist_ok=True)
 
-# Initialiser la base de données au démarrage
-init_db()

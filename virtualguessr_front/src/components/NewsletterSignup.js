@@ -9,7 +9,7 @@ const NewsletterSignup = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch('/api/newsletter-signup', {
+      const response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

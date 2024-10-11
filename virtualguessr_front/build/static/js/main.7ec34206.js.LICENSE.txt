@@ -2,25 +2,13 @@
  * Programatically add the following
  */
 
-/*! @name @videojs/http-streaming @version 2.16.3 @license Apache-2.0 */
+/*! @name @videojs/http-streaming @version 2.13.1 @license Apache-2.0 */
 
-/*! @name aes-decrypter @version 3.1.3 @license Apache-2.0 */
+/*! @name aes-decrypter @version 3.1.2 @license Apache-2.0 */
 
-/*! @name m3u8-parser @version 4.8.0 @license Apache-2.0 */
+/*! @name m3u8-parser @version 4.7.0 @license Apache-2.0 */
 
 /*! @name pkcs7 @version 1.0.4 @license Apache-2.0 */
-
-/**
- * @license
- * Video.js 7.21.6 <http://videojs.com/>
- * Copyright Brightcove, Inc. <https://www.brightcove.com/>
- * Available under Apache License Version 2.0
- * <https://github.com/videojs/video.js/blob/main/LICENSE>
- *
- * Includes vtt.js <https://github.com/mozilla/vtt.js>
- * Available under Apache License Version 2.0
- * <https://github.com/mozilla/vtt.js/blob/main/LICENSE>
- */
 
 /**
  * @license
@@ -68,4 +56,11 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
+ */
+
+/**
+ * @license lucide-react v0.451.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
  */
