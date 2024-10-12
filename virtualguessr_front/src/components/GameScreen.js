@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Pannellum } from "pannellum-react";
 import { Mail } from "lucide-react";
 import CustomMap from './CustomMap';
@@ -17,23 +17,23 @@ const GameScreen = () => {
   const timeoutRef = useRef(null);
 
   const panoramas = [
-    { url: '/images/13.jpg', position: { x: 6294, y: 3973} },
-    { url: '/images/14.jpg', position: { x: 3495, y: 3973} },
-    { url: '/images/16.jpg', position: { x: 3577, y: 4082} },
-    { url: '/images/17.jpg', position: { x: 3495, y: 4259} },
-    { url: '/images/19.jpg', position: { x: 3836, y: 4464} },
-    { url: '/images/20.jpg', position: { x: 4334, y: 4491} },
-    { url: '/images/21.jpg', position: { x: 5051, y: 4437} },
-    { url: '/images/22.jpg', position: { x: 5502, y: 4205} },
-    { url: '/images/23.jpg', position: { x: 6280, y: 3979} },
-    { url: '/images/24.jpg', position: { x: 6328, y: 3884} },
+    { url: '/images/13.jpg', position: { x: 6294, y: 3973 } },
+    { url: '/images/14.jpg', position: { x: 3495, y: 3973 } },
+    { url: '/images/16.jpg', position: { x: 3577, y: 4082 } },
+    { url: '/images/17.jpg', position: { x: 3495, y: 4259 } },
+    { url: '/images/19.jpg', position: { x: 3836, y: 4464 } },
+    { url: '/images/20.jpg', position: { x: 4334, y: 4491 } },
+    { url: '/images/21.jpg', position: { x: 5051, y: 4437 } },
+    { url: '/images/22.jpg', position: { x: 5502, y: 4205 } },
+    { url: '/images/23.jpg', position: { x: 6280, y: 3979 } },
+    { url: '/images/24.jpg', position: { x: 6328, y: 3884 } },
   ];
 
   useEffect(() => {
     const calculateFOV = () => {
       const aspectRatio = window.innerWidth / window.innerHeight;
       const baseAspectRatio = 16 / 9;
-      
+
       if (aspectRatio > baseAspectRatio) {
         // Écran plus large que 16:9
         setHfov(50 * (aspectRatio / baseAspectRatio));
@@ -47,7 +47,7 @@ const GameScreen = () => {
 
     calculateFOV();
     window.addEventListener('resize', calculateFOV);
-    
+
     return () => window.removeEventListener('resize', calculateFOV);
   }, []);
 
@@ -73,7 +73,7 @@ const GameScreen = () => {
     }, 500); // 500ms de délai avant de cacher le formulaire
   };
 
- return (
+  return (
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <Pannellum
         width="100%"
@@ -92,8 +92,8 @@ const GameScreen = () => {
         mouseZoom={false}
         hotspotDebug={false}
       />
-{/* Icône de mail et formulaire de newsletter */}
-      <div 
+      {/* Icône de mail et formulaire de newsletter */}
+      <div
         style={{
           position: 'absolute',
           top: '20px',
@@ -103,15 +103,15 @@ const GameScreen = () => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <Mail 
-          size={32} 
-          color="white" 
-          style={{ 
+        <Mail
+          size={32}
+          color="white"
+          style={{
             cursor: 'pointer',
             background: 'rgba(0,0,0,0.5)',
             padding: '5px',
             borderRadius: '50%'
-          }} 
+          }}
         />
         <div
           style={{
@@ -147,6 +147,7 @@ const GameScreen = () => {
           imageWidth={8192}
           imageHeight={8192}
           targetPosition={panoramas[currentIndex].position}
+          onNextImage={handleNextImage}
         />
       </div>
 

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition }) => {
+const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onNextImage }) => {
     const mapRef = useRef(null);
     const fullscreenMapRef = useRef(null);
     const mapInstanceRef = useRef(null);
@@ -62,6 +62,13 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition }) =
         };
     }, [initializeMap]);
 
+    useEffect(() => {
+        if (!isFullScreen && mapInstanceRef.current) {
+            mapInstanceRef.current.invalidateSize();
+        }
+    }, [isFullScreen]);
+
+
     const handleMapClick = useCallback((e) => {
         if (isFullScreen) return;
 
@@ -81,29 +88,70 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition }) =
 
     const handleChooseClick = useCallback(() => {
         if (!userPosition) return;
-
         setIsFullScreen(true);
-        
-        // Initialize fullscreen map in the next render cycle
+
         setTimeout(() => {
             initializeMap(fullscreenMapRef.current, fullscreenMapInstanceRef);
-            
             const map = fullscreenMapInstanceRef.current;
+
             const customIcon = L.icon({
                 iconUrl: '/images/logo_16.png',
                 iconSize: [16, 16],
                 iconAnchor: [8, 8],
             });
 
-            const userMarker = L.marker([userPosition.lat, userPosition.lng], { icon: customIcon }).addTo(map);
-            const targetMarker = L.marker([targetPosition.y, targetPosition.x]).addTo(map);
+            const userMarker = L.marker([userPosition.lat, userPosition.lng], { icon: customIcon });
+            const targetMarker = L.marker([targetPosition.y, targetPosition.x]);
 
             const bounds = L.latLngBounds([userPosition, [targetPosition.y, targetPosition.x]]).pad(0.1);
             map.fitBounds(bounds);
 
-            L.polyline([userPosition, [targetPosition.y, targetPosition.x]], { color: 'white', dashArray: '10, 10' }).addTo(map);
+            // Attendez que la carte ait fini de s'ajuster
+            map.once('moveend', () => {
+                userMarker.addTo(map);
+                targetMarker.addTo(map);
+
+                // Créez la ligne mais ne l'ajoutez pas encore à la carte
+                const line = L.polyline([], { color: 'white', dashArray: '10, 10' });
+
+                // Animation de dessin de la ligne
+                const drawLine = (progress) => {
+                    const lat = userPosition.lat + (targetPosition.y - userPosition.lat) * progress;
+                    const lng = userPosition.lng + (targetPosition.x - userPosition.lng) * progress;
+                    line.addLatLng([lat, lng]);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(() => drawLine(progress + 0.05));
+                    }
+                };
+
+                // Ajoutez la ligne à la carte et commencez l'animation
+                line.addTo(map);
+                drawLine(0);
+            });
         }, 0);
     }, [initializeMap, userPosition, targetPosition]);
+
+    const handleNextClick = useCallback(() => {
+        setIsFullScreen(false);
+        setIsExpanded(false);
+        setUserPosition(null);
+        setMapSize(400); // Reset to initial size
+
+        if (userMarkerRef.current) {
+            userMarkerRef.current.removeFrom(mapInstanceRef.current);
+            userMarkerRef.current = null;
+        }
+        if (fullscreenMapInstanceRef.current) {
+            fullscreenMapInstanceRef.current.remove();
+            fullscreenMapInstanceRef.current = null;
+        }
+        if (mapInstanceRef.current) {
+            mapInstanceRef.current.setView(mapInstanceRef.current.getCenter(), calculateMinZoom());
+            mapInstanceRef.current.invalidateSize();
+        }
+        onNextImage();
+    }, [onNextImage, calculateMinZoom]);
 
     const animateResize = useCallback((start, end, duration) => {
         const startTime = performance.now();
@@ -188,6 +236,7 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition }) =
                         height: '100vh',
                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
                         display: 'flex',
+                        flexDirection: 'column',
                         justifyContent: 'center',
                         alignItems: 'center',
                         zIndex: 1000
@@ -200,10 +249,29 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition }) =
                             backgroundColor: 'white',
                             borderRadius: '10px',
                             padding: '20px',
-                            position: 'relative'
+                            position: 'relative',
+                            display: 'flex',
+                            flexDirection: 'column'
                         }}
                     >
-                        <div ref={fullscreenMapRef} style={{ width: '100%', height: '100%' }} />
+                        <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1001 }}>
+                            <button
+                                onClick={handleNextClick}
+                                style={{
+                                    padding: '10px 20px',
+                                    fontSize: '16px',
+                                    fontWeight: 'bold',
+                                    backgroundColor: '#f44336',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Next
+                            </button>
+                        </div>
+                        <div ref={fullscreenMapRef} style={{ width: '100%', height: '100%', flexGrow: 1 }} />
                     </div>
                 </div>
             )}
