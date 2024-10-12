@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef} from 'react';
 import { Pannellum } from "pannellum-react";
 import { Mail } from "lucide-react";
 import CustomMap from './CustomMap';
+import CustomImageMap from './CustomImageMap';
 import NewsletterSignup from './NewsletterSignup';
 
 const GameScreen = () => {
@@ -141,16 +142,14 @@ const GameScreen = () => {
         borderRadius: '10px',
         overflow: 'hidden'
       }}>
-        <CustomMap
-          key={key}
-          targetPosition={panoramas[currentIndex].position}
-          onScore={handleScore}
-          score={score}
-          onNextImage={handleNextImage}
-        />
+        <CustomImageMap 
+        imageUrl="/images/erangel.jpg"
+        imageWidth={8192}  // Largeur réelle de votre image
+        imageHeight={8192} // Hauteur réelle de votre image
+      />
       </div>
 
-      {/* Affichage du score */}
+      {/* Affichage du score
       {showResult && (
         <div style={{
           position: 'absolute',
@@ -163,7 +162,7 @@ const GameScreen = () => {
         }}>
           Score: {globalScore}
         </div>
-      )}
+      )} */}
     </div>
   );
 };
