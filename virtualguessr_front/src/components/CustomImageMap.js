@@ -9,6 +9,7 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
     const fullscreenMapInstanceRef = useRef(null);
     const userMarkerRef = useRef(null);
     const targetMarkerRef = useRef(null);
+    const [score, setScore] = useState(null);
     const resizeTimeoutRef = useRef(null);
     const [mapSize, setMapSize] = useState(400);
     const [isExpanded, setIsExpanded] = useState(false);
@@ -62,15 +63,14 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
         };
     }, [initializeMap]);
 
-    useEffect(() => {
-        if (!isFullScreen && mapInstanceRef.current) {
-            mapInstanceRef.current.invalidateSize();
-        }
-    }, [isFullScreen]);
-
-
     const handleMapClick = useCallback((e) => {
         if (isFullScreen) return;
+
+        const guessButton = document.querySelector('.guess-button');
+        if (guessButton && guessButton.contains(e.originalEvent.target)) {
+            return;  // Ne rien faire si le clic est sur le bouton
+        }
+
 
         const customIcon = L.icon({
             iconUrl: '/images/logo_16.png',
@@ -84,7 +84,22 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
             userMarkerRef.current = L.marker(e.latlng, { icon: customIcon }).addTo(mapInstanceRef.current);
         }
         setUserPosition(e.latlng);
+        console.log("event"+e.latlng);
     }, [isFullScreen]);
+
+    const computeDistance = (point1, point2) => {
+        const dx = point1.lng - point2.x;
+        const dy = point1.lat - point2.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    const computeScore = (distance) => {
+        const maxScore = 5000;
+        const maxDistance = Math.sqrt(imageWidth * imageWidth + imageHeight * imageHeight);
+        const normalizedDistance = distance / maxDistance;
+        const score = maxScore * Math.exp(-5 * normalizedDistance);
+        return Math.round(score);
+    };
 
     const handleChooseClick = useCallback(() => {
         if (!userPosition) return;
@@ -100,21 +115,25 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
                 iconAnchor: [8, 8],
             });
 
+            // console.log(userPosition);
+            // console.log(targetPosition);
             const userMarker = L.marker([userPosition.lat, userPosition.lng], { icon: customIcon });
             const targetMarker = L.marker([targetPosition.y, targetPosition.x]);
 
             const bounds = L.latLngBounds([userPosition, [targetPosition.y, targetPosition.x]]).pad(0.1);
             map.fitBounds(bounds);
 
-            // Attendez que la carte ait fini de s'ajuster
+            // Calcul du score
+            const distance = computeDistance(userPosition, targetPosition);
+            const newScore = computeScore(distance);
+            setScore(newScore);
+
             map.once('moveend', () => {
                 userMarker.addTo(map);
                 targetMarker.addTo(map);
 
-                // Créez la ligne mais ne l'ajoutez pas encore à la carte
                 const line = L.polyline([], { color: 'white', dashArray: '10, 10' });
 
-                // Animation de dessin de la ligne
                 const drawLine = (progress) => {
                     const lat = userPosition.lat + (targetPosition.y - userPosition.lat) * progress;
                     const lng = userPosition.lng + (targetPosition.x - userPosition.lng) * progress;
@@ -125,12 +144,12 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
                     }
                 };
 
-                // Ajoutez la ligne à la carte et commencez l'animation
                 line.addTo(map);
                 drawLine(0);
             });
         }, 0);
-    }, [initializeMap, userPosition, targetPosition]);
+    }, [initializeMap, userPosition, targetPosition, imageWidth, imageHeight]);
+
 
     const handleNextClick = useCallback(() => {
         setIsFullScreen(false);
@@ -205,6 +224,7 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
             >
                 {isExpanded && !isFullScreen && (
                     <button
+                        className="guess-button"
                         onClick={handleChooseClick}
                         style={{
                             position: 'absolute',
@@ -227,51 +247,70 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
                 )}
             </div>
             {isFullScreen && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        width: '100vw',
-                        height: '100vh',
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        zIndex: 1000
-                    }}
-                >
-                    <div
-                        style={{
-                            width: '90%',
-                            height: '90%',
-                            backgroundColor: 'white',
-                            borderRadius: '10px',
-                            padding: '20px',
-                            position: 'relative',
-                            display: 'flex',
-                            flexDirection: 'column'
-                        }}
-                    >
-                        <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1001 }}>
-                            <button
-                                onClick={handleNextClick}
-                                style={{
-                                    padding: '10px 20px',
-                                    fontSize: '16px',
-                                    fontWeight: 'bold',
-                                    backgroundColor: '#f44336',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '5px',
-                                    cursor: 'pointer',
-                                }}
-                            >
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        width: '90%',
+                        height: '90%',
+                        backgroundColor: 'white',
+                        borderRadius: '10px',
+                        padding: '20px',
+                        position: 'relative',
+                        overflow: 'hidden'
+                    }}>
+                        <div ref={fullscreenMapRef} style={{
+                            width: '100%',
+                            height: '100%',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0
+                        }} />
+                        <div style={{
+                            position: 'absolute',
+                            top: '10px',
+                            right: '10px',
+                            zIndex: 1001
+                        }}>
+                            <button onClick={handleNextClick} style={{
+                                padding: '10px 20px',
+                                fontSize: '16px',
+                                fontWeight: 'bold',
+                                backgroundColor: '#f44336',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                            }}>
                                 Next
                             </button>
                         </div>
-                        <div ref={fullscreenMapRef} style={{ width: '100%', height: '100%', flexGrow: 1 }} />
+                        {score !== null && (
+                            <div style={{
+                                position: 'absolute',
+                                bottom: '50px',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                padding: '10px 20px',
+                                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                borderRadius: '5px',
+                                fontSize: '35px',
+                                fontWeight: 'bold',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                                zIndex: 1001
+                            }}>
+                                Score: {score}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
