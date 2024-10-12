@@ -142,11 +142,12 @@ const GameScreen = () => {
         borderRadius: '10px',
         overflow: 'hidden'
       }}>
-        <CustomImageMap 
-        imageUrl="/images/erangel.jpg"
-        imageWidth={8192}  // Largeur réelle de votre image
-        imageHeight={8192} // Hauteur réelle de votre image
-      />
+        <CustomImageMap
+          imageUrl="/images/erangel.jpg"
+          imageWidth={8192}
+          imageHeight={8192}
+          targetPosition={panoramas[currentIndex].position}
+        />
       </div>
 
       {/* Affichage du score
