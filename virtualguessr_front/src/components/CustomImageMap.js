@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import styles from './CustomShovelIcon.module.css';
 
 const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onNextImage }) => {
     const mapRef = useRef(null);
@@ -71,9 +72,9 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
             return;  // Ne rien faire si le clic est sur le bouton
         }
 
-
-        const customIcon = L.icon({
-            iconUrl: '/images/shovel_icon.png',
+        const customShovelIcon = L.divIcon({
+            className: styles.customShovelIcon,
+              html: `<div style="background-image: url('/images/shovel_icon.png')" class="${styles.shovelIconInner}"></div>`,
             iconSize: [22, 61],
             iconAnchor: [11, 61],
         });
@@ -81,7 +82,7 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
         if (userMarkerRef.current) {
             userMarkerRef.current.setLatLng(e.latlng);
         } else {
-            userMarkerRef.current = L.marker(e.latlng, { icon: customIcon }).addTo(mapInstanceRef.current);
+            userMarkerRef.current = L.marker(e.latlng, { icon: customShovelIcon }).addTo(mapInstanceRef.current);
         }
         setUserPosition(e.latlng);
         console.log("event" + e.latlng);
@@ -110,7 +111,7 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
             const map = fullscreenMapInstanceRef.current;
 
             const customIcon = L.icon({
-                iconUrl: '/images/logo_16.png',
+                iconUrl: '/images/shovel_icon.png',
                 iconSize: [16, 16],
                 iconAnchor: [8, 8],
             });
