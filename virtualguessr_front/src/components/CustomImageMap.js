@@ -73,9 +73,9 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
 
 
         const customIcon = L.icon({
-            iconUrl: '/images/logo_16.png',
-            iconSize: [16, 16],
-            iconAnchor: [8, 8],
+            iconUrl: '/images/shovel_icon.png',
+            iconSize: [22, 61],
+            iconAnchor: [11, 61],
         });
 
         if (userMarkerRef.current) {
@@ -84,7 +84,7 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
             userMarkerRef.current = L.marker(e.latlng, { icon: customIcon }).addTo(mapInstanceRef.current);
         }
         setUserPosition(e.latlng);
-        console.log("event"+e.latlng);
+        console.log("event" + e.latlng);
     }, [isFullScreen]);
 
     const computeDistance = (point1, point2) => {
@@ -115,15 +115,12 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
                 iconAnchor: [8, 8],
             });
 
-            // console.log(userPosition);
-            // console.log(targetPosition);
             const userMarker = L.marker([userPosition.lat, userPosition.lng], { icon: customIcon });
             const targetMarker = L.marker([targetPosition.y, targetPosition.x]);
 
             const bounds = L.latLngBounds([userPosition, [targetPosition.y, targetPosition.x]]).pad(0.1);
             map.fitBounds(bounds);
 
-            // Calcul du score
             const distance = computeDistance(userPosition, targetPosition);
             const newScore = computeScore(distance);
             setScore(newScore);
