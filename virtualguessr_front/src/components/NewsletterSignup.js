@@ -37,7 +37,7 @@ const NewsletterSignup = () => {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Your mail adress"
+          placeholder="Mail"
           required
           className="email-input"
         />
@@ -46,7 +46,7 @@ const NewsletterSignup = () => {
           disabled={loading}
           className="submit-button"
         >
-          {loading ? 'Subscribing...' : "Subscribe to newsletter"}
+          {loading ? 'Subscribing...' : "Be part of this journey"}
         </button>
       </form>
       {status === 'success' && (

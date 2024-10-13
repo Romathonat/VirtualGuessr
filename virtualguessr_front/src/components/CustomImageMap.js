@@ -74,7 +74,7 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
 
         const customShovelIcon = L.divIcon({
             className: styles.customShovelIcon,
-              html: `<div style="background-image: url('/images/shovel_icon.png')" class="${styles.shovelIconInner}"></div>`,
+            html: `<div style="background-image: url('/images/shovel_icon.png')" class="${styles.shovelIconInner}"></div>`,
             iconSize: [22, 61],
             iconAnchor: [11, 61],
         });
@@ -110,14 +110,20 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
             initializeMap(fullscreenMapRef.current, fullscreenMapInstanceRef);
             const map = fullscreenMapInstanceRef.current;
 
-            const customIcon = L.icon({
+            const customShovelIcon = L.icon({
                 iconUrl: '/images/shovel_icon.png',
-                iconSize: [16, 16],
-                iconAnchor: [8, 8],
+                iconSize: [22, 61],
+                iconAnchor: [11, 61],
             });
 
-            const userMarker = L.marker([userPosition.lat, userPosition.lng], { icon: customIcon });
-            const targetMarker = L.marker([targetPosition.y, targetPosition.x]);
+            const flagIcon = L.icon({
+                iconUrl: '/images/flag_icon.png',
+                iconSize: [62, 70],
+                iconAnchor: [2, 70],
+            });
+
+            const userMarker = L.marker([userPosition.lat, userPosition.lng], { icon: customShovelIcon });
+            const targetMarker = L.marker([targetPosition.y, targetPosition.x], { icon: flagIcon});
 
             const bounds = L.latLngBounds([userPosition, [targetPosition.y, targetPosition.x]]).pad(0.1);
             map.fitBounds(bounds);
