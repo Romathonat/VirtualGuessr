@@ -20,10 +20,18 @@ const GameScreen = () => {
   const pannellumRef = useRef(null);
   const containerRef = useRef(null);
 
+  const imageWidth = 8192;
+  const imageHeight = 8192;
+
   const panoramas = [
-    { url: '/images/13.jpg', position: { x: 6294, y: 3973 } },
-    { url: '/images/14.jpg', position: { x: 3495, y: 3973 } },
-    // ... autres panoramas
+    { 
+      url: '/images/13.jpg', 
+      position: { x: 6294, y: 3973 },
+    },
+    { 
+      url: '/images/14.jpg', 
+      position: { x: 3495, y: 3973 },
+    },
   ];
 
   const handleResize = () => {
@@ -105,8 +113,8 @@ const GameScreen = () => {
         }}>
           <CustomImageMap
             imageUrl="/images/erangel.jpg"
-            imageWidth={8192}
-            imageHeight={8192}
+            imageWidth={imageWidth}
+            imageHeight={imageHeight}
             targetPosition={panoramas[currentIndex].position}
             onNextImage={handleNextImage}
             style={{
@@ -174,8 +182,8 @@ const GameScreen = () => {
         }}>
           <CustomImageMap
             imageUrl="/images/erangel.jpg"
-            imageWidth={8192}
-            imageHeight={8192}
+            imageWidth={imageWidth}
+            imageHeight={imageHeight}
             targetPosition={panoramas[currentIndex].position}
             onNextImage={handleNextImage}
           />

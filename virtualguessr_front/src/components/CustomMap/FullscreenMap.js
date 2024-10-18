@@ -1,16 +1,60 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ScoreDisplay from './ScoreDisplay';
+import L from 'leaflet';
 
-const FullscreenMap = ({ fullscreenMapRef, fullscreenMapInstanceRef, score, handleNextClick, initializeMap}) => {
+const FullscreenMap = ({ fullscreenMapRef, fullscreenMapInstanceRef, score, handleNextClick, initializeMap, userPosition, targetPosition }) => {
     useEffect(() => {
         const map = initializeMap(fullscreenMapRef.current, fullscreenMapInstanceRef);
         
-        return () => {
-            if (map) {
-                map.remove();
-            }
-        };
-    }, [initializeMap, fullscreenMapRef, fullscreenMapInstanceRef]);
+        console.log('map:', map);
+        console.log('userPosition:', userPosition);
+        console.log('targetPosition:', targetPosition);
+
+        if (map && userPosition && targetPosition) {
+            console.log('La carte est prête');
+            
+                const customShovelIcon = L.icon({
+                    iconUrl: '/images/shovel_icon.png',
+                    iconSize: [22, 61],
+                    iconAnchor: [11, 61],
+                });
+
+                const flagIcon = L.icon({
+                    iconUrl: '/images/flag_icon.png',
+                    iconSize: [62, 70],
+                    iconAnchor: [2, 70],
+                });
+
+                const userMarker = L.marker([userPosition.lat, userPosition.lng], { icon: customShovelIcon });
+                const targetMarker = L.marker([targetPosition.y, targetPosition.x], { icon: flagIcon});
+
+                const bounds = L.latLngBounds([userPosition, [targetPosition.y, targetPosition.x]]).pad(0.1);
+                map.fitBounds(bounds);
+
+                map.once('moveend', () => {
+                    userMarker.addTo(map);
+                    targetMarker.addTo(map);
+
+                    const line = L.polyline([], { color: 'white', dashArray: '10, 10' });
+
+                    const drawLine = (progress) => {
+                        const lat = userPosition.lat + (targetPosition.y - userPosition.lat) * progress;
+                        const lng = userPosition.lng + (targetPosition.x - userPosition.lng) * progress;
+                        line.addLatLng([lat, lng]);
+
+                        if (progress < 1) {
+                            requestAnimationFrame(() => drawLine(progress + 0.01)); // Réduit de 0.05 à 0.01
+                        }
+                    };
+
+                    line.addTo(map);
+                    drawLine(0);
+                });
+
+                console.log('Carte plein écran initialisée avec succès');
+        }
+
+    }, [initializeMap, fullscreenMapRef, fullscreenMapInstanceRef, userPosition, targetPosition]);
 
     return (
         <div style={{

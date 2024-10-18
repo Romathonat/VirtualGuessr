@@ -35,7 +35,7 @@ const useMapLogic = (imageUrl, imageWidth, imageHeight) => {
 
 
     const initializeMap = useCallback((mapContainer, mapInstance) => {
-        if (!mapContainer || mapInstance.current) return;
+        if (!mapContainer || mapInstance.current) return null;
         const minZoom = calculateMinZoom();
         const map = L.map(mapContainer, {
             crs: L.CRS.Simple,
@@ -56,7 +56,7 @@ const useMapLogic = (imageUrl, imageWidth, imageHeight) => {
         map.on('click', handleMapClick);
         mapInstance.current = map;
 
-        console.log(map);
+        return map; // Retourner l'instance de la carte
     }, [imageUrl, imageWidth, imageHeight, calculateMinZoom]);
 
     const handleMapClick = useCallback((e) => {

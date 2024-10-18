@@ -53,11 +53,13 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
             />
             {isFullScreen && (
                 <FullscreenMap
-                fullscreenMapRef={fullscreenMapRef}
+                    fullscreenMapRef={fullscreenMapRef}
                     fullscreenMapInstanceRef={fullscreenMapInstanceRef}
                     score={score}
                     handleNextClick={handleNextClick}
                     initializeMap={initializeMap}
+                    userPosition={userPosition}
+                    targetPosition={targetPosition}
                 />
             )}
         </>
