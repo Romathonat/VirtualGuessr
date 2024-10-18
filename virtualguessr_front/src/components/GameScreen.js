@@ -68,6 +68,9 @@ const GameScreen = () => {
         minPitch: -17,
         maxPitch: 17,
         pitch: 0,
+        showFullscreenCtrl: false,
+        keyboardZoom: false,
+        disableKeyboardCtrl: true, // Ajoutez cette ligne
       });
     }
   }, [currentIndex, isPortrait, hfov, vaov]);

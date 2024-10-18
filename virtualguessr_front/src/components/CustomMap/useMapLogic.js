@@ -44,7 +44,8 @@ const useMapLogic = (imageUrl, imageWidth, imageHeight) => {
             zoomSnap: 0,
             zoomDelta: 0.1,
             attributionControl: false,
-            maxBoundsViscosity: 1.0
+            maxBoundsViscosity: 1.0,
+            fullscreenControl: false
         });
 
         const bounds = [[0, 0], [imageHeight, imageWidth]];
