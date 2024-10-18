@@ -109,8 +109,7 @@ const GameScreen = () => {
       {isPortrait && (
         <div style={{
           flex: 1,
-          backgroundColor: '#f0f0f0',
-          padding: '20px',
+          width: '100%',
           position: 'relative',
           overflow: 'hidden'
         }}>
@@ -126,7 +125,6 @@ const GameScreen = () => {
               left: 0,
               width: '100%',
               height: '100%',
-              objectFit: 'cover'
             }}
           />
         </div>

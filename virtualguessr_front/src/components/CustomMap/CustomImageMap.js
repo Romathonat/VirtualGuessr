@@ -6,7 +6,7 @@ import useMapResize from './useMapResize';
 import MapContainer from './MapContainer';
 import FullscreenMap from './FullscreenMap';
 
-const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onNextImage }) => {
+const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onNextImage, style }) => {
     const {
         mapRef,
         fullscreenMapRef,
@@ -50,6 +50,7 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onN
                 handleResize={handleResize}
                 handleMapClick={handleMapClick}
                 handleChooseClick={handleChooseClick}
+                style={style}
             />
             {isFullScreen && (
                 <FullscreenMap
