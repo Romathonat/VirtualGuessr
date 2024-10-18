@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Pannellum } from "pannellum-react";
+import 'pannellum';
+import 'pannellum/build/pannellum.css';
+
 import { Mail } from "lucide-react";
-import CustomMap from './CustomMap';
-import CustomImageMap from './CustomImageMap';
+import CustomImageMap from './CustomMap/CustomImageMap';
 import NewsletterSignup from './NewsletterSignup';
 
 const GameScreen = () => {
@@ -10,56 +11,61 @@ const GameScreen = () => {
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [key, setKey] = useState(0);
-  const [hfov, setHfov] = useState(50);
-  const [vaov, setVaov] = useState(38);
   const [showNewsletterForm, setShowNewsletterForm] = useState(false);
+  const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
+  const [hfov, setHfov] = useState(window.innerWidth / 13762 * 360);
+  const [vaov, setVaov] = useState(window.innerHeight / 1306 * 41.7);
+  
   const timeoutRef = useRef(null);
+  const pannellumRef = useRef(null);
+  const containerRef = useRef(null);
 
   const panoramas = [
     { url: '/images/13.jpg', position: { x: 6294, y: 3973 } },
     { url: '/images/14.jpg', position: { x: 3495, y: 3973 } },
-    { url: '/images/16.jpg', position: { x: 3577, y: 4082 } },
-    { url: '/images/17.jpg', position: { x: 3495, y: 4259 } },
-    { url: '/images/19.jpg', position: { x: 3836, y: 4464 } },
-    { url: '/images/20.jpg', position: { x: 4334, y: 4491 } },
-    { url: '/images/21.jpg', position: { x: 5051, y: 4437 } },
-    { url: '/images/22.jpg', position: { x: 5502, y: 4205 } },
-    { url: '/images/23.jpg', position: { x: 6280, y: 3979 } },
-    { url: '/images/24.jpg', position: { x: 6328, y: 3884 } },
+    // ... autres panoramas
   ];
 
-  useEffect(() => {
-    const calculateFOV = () => {
-      const aspectRatio = window.innerWidth / window.innerHeight;
-      const baseAspectRatio = 16 / 9;
-
-      if (aspectRatio > baseAspectRatio) {
-        // Écran plus large que 16:9
-        setHfov(50 * (aspectRatio / baseAspectRatio));
-        setVaov(38);
-      } else {
-        // Écran plus étroit que 16:9
-        setHfov(50);
-        setVaov(38 / (aspectRatio / baseAspectRatio));
-      }
-    };
-
-    calculateFOV();
-    window.addEventListener('resize', calculateFOV);
-
-    return () => window.removeEventListener('resize', calculateFOV);
-  }, []);
-
-  const handleNextImage = () => {
-    const nextIndex = (currentIndex + 1) % panoramas.length;
-    setCurrentIndex(nextIndex);
-    setKey(prevKey => prevKey + 1);
+  const handleResize = () => {
+    const newIsPortrait = window.innerHeight > window.innerWidth;
+    setIsPortrait(newIsPortrait);
+    setHfov(window.innerWidth / 13762 * 360);
+    setVaov(window.innerHeight / 1306 * 41.7);
+    
+    if (pannellumRef.current) {
+      pannellumRef.current.setHfov(window.innerWidth / 13762 * 360);
+    }
   };
 
-  const handleScore = (newScore) => {
-    setScore(newScore);
-    setGlobalScore(globalScore + newScore);
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (containerRef.current && window.pannellum) {
+      if (pannellumRef.current) {
+        pannellumRef.current.destroy();
+      }
+      
+      pannellumRef.current = window.pannellum.viewer(containerRef.current, {
+        type: 'equirectangular',
+        panorama: panoramas[currentIndex].url,
+        autoLoad: true,
+        compass: false,
+        showZoomCtrl: false,
+        mouseZoom: false,
+        hfov: hfov,
+        vaov: vaov,
+        minPitch: -17,
+        maxPitch: 17,
+        pitch: 0,
+      });
+    }
+  }, [currentIndex, isPortrait, hfov, vaov]);
+
+  const handleNextImage = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % panoramas.length);
   };
 
   const handleMouseEnter = () => {
@@ -70,28 +76,51 @@ const GameScreen = () => {
   const handleMouseLeave = () => {
     timeoutRef.current = setTimeout(() => {
       setShowNewsletterForm(false);
-    }, 500); // 500ms de délai avant de cacher le formulaire
+    }, 500);
   };
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
-      <Pannellum
-        width="100%"
-        height="100%"
-        image={panoramas[currentIndex].url}
-        avoidShowingBackground={true}
-        type="equirectangular"
-        hfov={hfov}
-        vaov={vaov}
-        minPitch={-19}
-        maxPitch={19}
-        pitch={0}
-        autoLoad
-        compass={false}
-        showZoomCtrl={false}
-        mouseZoom={false}
-        hotspotDebug={false}
-      />
+    <div style={{ 
+      position: 'relative', 
+      width: '100%', 
+      height: '100vh',
+      display: 'flex',
+      flexDirection: isPortrait ? 'column' : 'row'
+    }}>
+      <div
+        ref={containerRef}
+        style={{ 
+          width: '100%', 
+          height: isPortrait ? '50vh' : '100%'
+        }}
+      ></div>
+
+      {isPortrait && (
+        <div style={{
+          flex: 1,
+          backgroundColor: '#f0f0f0',
+          padding: '20px',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <CustomImageMap
+            imageUrl="/images/erangel.jpg"
+            imageWidth={8192}
+            imageHeight={8192}
+            targetPosition={panoramas[currentIndex].position}
+            onNextImage={handleNextImage}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
+        </div>
+      )}
+
       {/* Icône de mail et formulaire de newsletter */}
       <div
         style={{
@@ -134,24 +163,26 @@ const GameScreen = () => {
         </div>
       </div>
 
-      {/* Minimap dans le coin inférieur droit */}
-      <div style={{
-        position: 'absolute',
-        bottom: '20px',
-        right: '20px',
-        borderRadius: '10px',
-        overflow: 'hidden'
-      }}>
-        <CustomImageMap
-          imageUrl="/images/erangel.jpg"
-          imageWidth={8192}
-          imageHeight={8192}
-          targetPosition={panoramas[currentIndex].position}
-          onNextImage={handleNextImage}
-        />
-      </div>
+      {/* Minimap dans le coin inférieur droit (seulement en mode paysage) */}
+      {!isPortrait && (
+        <div style={{
+          position: 'absolute',
+          bottom: '20px',
+          right: '20px',
+          borderRadius: '10px',
+          overflow: 'hidden'
+        }}>
+          <CustomImageMap
+            imageUrl="/images/erangel.jpg"
+            imageWidth={8192}
+            imageHeight={8192}
+            targetPosition={panoramas[currentIndex].position}
+            onNextImage={handleNextImage}
+          />
+        </div>
+      )}
 
-      {/* Affichage du score
+      {/* Affichage du score */}
       {showResult && (
         <div style={{
           position: 'absolute',
@@ -164,9 +195,9 @@ const GameScreen = () => {
         }}>
           Score: {globalScore}
         </div>
-      )} */}
+      )}
     </div>
   );
 };
 
-export default GameScreen; 
+export default GameScreen;
