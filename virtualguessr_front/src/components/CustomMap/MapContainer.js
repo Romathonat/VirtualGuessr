@@ -1,7 +1,7 @@
 import React from 'react';
 import GuessButton from './GuessButton';
 
-const MapContainer = ({ mapRef, mapSize, isExpanded, isFullScreen, handleResize, handleMapClick, handleChooseClick, style }) => (
+const MapContainer = ({ mapRef, mapSize, isExpanded, isFullScreen, handleResize, handleMapClick, handleChooseClick, style, isPortrait }) => (
     <div
         ref={mapRef}
         onMouseEnter={() => !isFullScreen && handleResize(true)}
@@ -14,7 +14,7 @@ const MapContainer = ({ mapRef, mapSize, isExpanded, isFullScreen, handleResize,
             ...style
         }}
     >
-        {isExpanded && !isFullScreen && (
+        {(isExpanded || isPortrait) && !isFullScreen && (
             <GuessButton onClick={handleChooseClick} />
         )}
     </div>

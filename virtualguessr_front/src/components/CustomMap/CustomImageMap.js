@@ -5,21 +5,24 @@ import useScoreCalculation from './useScoreCalculation';
 import useMapResize from './useMapResize';
 import MapContainer from './MapContainer';
 import FullscreenMap from './FullscreenMap';
+import { useGameContext } from '../../contexts/GameContext';
 
 const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onNextImage, style }) => {
     const {
-        mapRef,
-        fullscreenMapRef,
-        mapInstanceRef,
-        fullscreenMapInstanceRef,
-        handleMapClick,
-        isFullScreen,
-        setIsFullScreen,
-        userPosition,
-        setUserPosition,
-        initializeMap,
-        cleanupMap
-    } = useMapLogic(imageUrl, imageWidth, imageHeight);
+      userPosition,
+      setUserPosition,
+      isFullScreen,
+      setIsFullScreen,
+    } = useGameContext();
+    const {
+      mapInstanceRef,
+      mapRef,
+      fullscreenMapRef,
+      fullscreenMapInstanceRef,
+      handleMapClick,
+      initializeMap,
+      cleanupMap
+    } = useMapLogic(imageUrl, targetPosition, imageWidth, imageHeight);
 
     const { score, calculateScore } = useScoreCalculation(imageWidth, imageHeight);
 

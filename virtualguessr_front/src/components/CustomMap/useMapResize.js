@@ -1,8 +1,8 @@
-import { useState, useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
+import { useGameContext } from '../../contexts/GameContext';
 
 const useMapResize = (mapInstanceRef) => {
-    const [mapSize, setMapSize] = useState(400);
-    const [isExpanded, setIsExpanded] = useState(false);
+    const { mapSize, setMapSize, isExpanded, setIsExpanded } = useGameContext();
     const resizeTimeoutRef = useRef(null);
 
     const animateResize = useCallback((start, end, mapInstanceRef, duration) => {
@@ -29,7 +29,7 @@ const useMapResize = (mapInstanceRef) => {
             }
         };
         requestAnimationFrame(animate);
-    }, []);
+    }, [setMapSize, setIsExpanded]);
 
     const handleResize = useCallback((shouldExpand) => {
         if (resizeTimeoutRef.current) {

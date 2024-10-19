@@ -5,14 +5,19 @@ import 'pannellum/build/pannellum.css';
 import { Mail } from "lucide-react";
 import CustomImageMap from './CustomMap/CustomImageMap';
 import NewsletterSignup from './NewsletterSignup';
+import { useGameContext } from '../contexts/GameContext';
 
 const GameScreen = () => {
-  const [globalScore, setGlobalScore] = useState(0);
-  const [score, setScore] = useState(0);
-  const [showResult, setShowResult] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const {
+    globalScore,
+    showResult,
+    isPortrait,
+    setIsPortrait,
+    currentIndex,
+    setCurrentIndex
+  } = useGameContext();
+
   const [showNewsletterForm, setShowNewsletterForm] = useState(false);
-  const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
   const [hfov, setHfov] = useState(window.innerWidth / 13762 * 360);
   const [vaov, setVaov] = useState(window.innerHeight / 1306 * 41.7);
   
@@ -47,6 +52,7 @@ const GameScreen = () => {
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
+    handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -119,6 +125,7 @@ const GameScreen = () => {
             imageHeight={imageHeight}
             targetPosition={panoramas[currentIndex].position}
             onNextImage={handleNextImage}
+            isPortrait={isPortrait}
             style={{
               position: 'absolute',
               top: 0,
@@ -187,6 +194,7 @@ const GameScreen = () => {
             imageHeight={imageHeight}
             targetPosition={panoramas[currentIndex].position}
             onNextImage={handleNextImage}
+            isPortrait={isPortrait}
           />
         </div>
       )}

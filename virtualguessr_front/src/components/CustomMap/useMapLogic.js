@@ -2,15 +2,22 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import styles from './CustomShovelIcon.module.css';
+import { useGameContext } from '../../contexts/GameContext';
 
-const useMapLogic = (imageUrl, imageWidth, imageHeight) => {
+
+const useMapLogic = (imageUrl, targetPosition, imageWidth, imageHeight) => {
     const mapRef = useRef(null);
     const fullscreenMapRef = useRef(null);
     const mapInstanceRef = useRef(null);
     const fullscreenMapInstanceRef = useRef(null);
     const userMarkerRef = useRef(null);
-    const [isFullScreen, setIsFullScreen] = useState(false);
-    const [userPosition, setUserPosition] = useState(null);
+    const {
+        userPosition,
+        setUserPosition,
+        isFullScreen,
+        setIsFullScreen,
+        setTargetPosition
+    } = useGameContext();
 
     const calculateMinZoom = useCallback(() => {
         const maxMapSize = Math.max(800, 400);
@@ -88,6 +95,7 @@ const useMapLogic = (imageUrl, imageWidth, imageHeight) => {
 
     useEffect(() => {
         initializeMap(mapRef.current, mapInstanceRef);
+        setTargetPosition(targetPosition);
         return () => {
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.remove();

@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import ScoreDisplay from './ScoreDisplay';
 import L from 'leaflet';
+import { useGameContext } from '../../contexts/GameContext';
 
-const FullscreenMap = ({ fullscreenMapRef, fullscreenMapInstanceRef, score, handleNextClick, initializeMap, userPosition, targetPosition }) => {
+const FullscreenMap = ({ fullscreenMapRef, fullscreenMapInstanceRef, handleNextClick, initializeMap }) => {
+    const { score, userPosition, targetPosition } = useGameContext();
+
     useEffect(() => {
         const map = initializeMap(fullscreenMapRef.current, fullscreenMapInstanceRef);
         

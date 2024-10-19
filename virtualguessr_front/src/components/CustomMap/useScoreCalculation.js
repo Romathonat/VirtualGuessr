@@ -1,8 +1,9 @@
 // useScoreCalculation.js
 import { useState, useCallback } from 'react';
+import { useGameContext } from '../../contexts/GameContext';
 
 const useScoreCalculation = (imageWidth, imageHeight) => {
-    const [score, setScore] = useState(null);
+    const { score, setScore } = useGameContext();
 
     const calculateScore = useCallback((userPosition, targetPosition) => {
         const distance = computeDistance(userPosition, targetPosition);

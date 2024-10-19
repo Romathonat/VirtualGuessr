@@ -1,10 +1,12 @@
 import React from 'react';
 import GameScreen from './components/GameScreen';
+import { GameProvider } from './contexts/GameContext';
 
 const App = () => {
   return (
-    <GameScreen 
-    />
+    <GameProvider>
+      <GameScreen />
+    </GameProvider>
   );
 };
 
