@@ -1,69 +1,57 @@
 // CustomImageMap.js
-import React from 'react';
-import useMapLogic from './useMapLogic';
-import useScoreCalculation from './useScoreCalculation';
-import useMapResize from './useMapResize';
+import React, { useEffect } from 'react';
+import useMapLogic from '../../hooks/useMapLogic';
+import useScoreCalculation from '../../hooks/useScoreCalculation';
 import MapContainer from './MapContainer';
 import FullscreenMap from './FullscreenMap';
 import { useGameContext } from '../../contexts/GameContext';
 
-const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, onNextImage, style }) => {
+const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, style, onCleanupMap: setCleanupMap }) => {
     const {
-      userPosition,
-      setUserPosition,
-      isFullScreen,
-      setIsFullScreen,
+        isFullScreen,
     } = useGameContext();
+
+    const { calculateScore} = useScoreCalculation(imageWidth, imageHeight);
     const {
-      mapInstanceRef,
-      mapRef,
-      fullscreenMapRef,
-      fullscreenMapInstanceRef,
-      handleMapClick,
-      initializeMap,
-      cleanupMap
-    } = useMapLogic(imageUrl, targetPosition, imageWidth, imageHeight);
+        mapSize,
+        mapRef,
+        fullscreenMapRef,
+        fullscreenMapInstanceRef,
+        handleMapClick,
+        initializeMap,
+        isPortrait,
+        isExpanded,
+        cleanupMap,
+        handleResize,
+        handleChooseClick,
+        handleNextClick
 
-    const { score, calculateScore } = useScoreCalculation(imageWidth, imageHeight);
-
-    const { mapSize, isExpanded, handleResize, resetExpand } = useMapResize(mapInstanceRef);
-
-    const handleChooseClick = () => {
-        if (!userPosition) return;
-        setIsFullScreen(true);
-        calculateScore(userPosition, targetPosition);
-    };
-
-    const handleNextClick = () => {
-        setIsFullScreen(false);
-        resetExpand();
-        setUserPosition(null);
-
-        onNextImage();
-        cleanupMap();
-    };
+    } = useMapLogic(imageUrl, targetPosition, imageWidth, imageHeight, calculateScore);
+    
+    useEffect(() => {
+        if (setCleanupMap) {
+            setCleanupMap(cleanupMap);
+        }
+    }, [setCleanupMap, cleanupMap]);
 
     return (
         <>
             <MapContainer
                 mapRef={mapRef}
                 mapSize={mapSize}
-                isExpanded={isExpanded}
-                isFullScreen={isFullScreen}
                 handleResize={handleResize}
                 handleMapClick={handleMapClick}
                 handleChooseClick={handleChooseClick}
                 style={style}
+                isPortrait={isPortrait}
+                isExpanded={isExpanded}
             />
             {isFullScreen && (
                 <FullscreenMap
                     fullscreenMapRef={fullscreenMapRef}
                     fullscreenMapInstanceRef={fullscreenMapInstanceRef}
-                    score={score}
                     handleNextClick={handleNextClick}
                     initializeMap={initializeMap}
-                    userPosition={userPosition}
-                    targetPosition={targetPosition}
                 />
             )}
         </>

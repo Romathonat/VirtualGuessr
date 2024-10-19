@@ -2,21 +2,29 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import styles from './CustomShovelIcon.module.css';
-import { useGameContext } from '../../contexts/GameContext';
+import { useGameContext } from '../contexts/GameContext';
 
 
-const useMapLogic = (imageUrl, targetPosition, imageWidth, imageHeight) => {
+const useMapLogic = (imageUrl, targetPosition, imageWidth, imageHeight, calculateScore) => {
     const mapRef = useRef(null);
     const fullscreenMapRef = useRef(null);
     const mapInstanceRef = useRef(null);
     const fullscreenMapInstanceRef = useRef(null);
     const userMarkerRef = useRef(null);
+    const resizeTimeoutRef = useRef(null);
     const {
         userPosition,
         setUserPosition,
         isFullScreen,
         setIsFullScreen,
-        setTargetPosition
+        setTargetPosition,
+        setCurrentIndex,
+        panoramas,
+        mapSize,
+        setMapSize,
+        isExpanded,
+        isPortrait,
+        setIsExpanded,
     } = useGameContext();
 
     const calculateMinZoom = useCallback(() => {
@@ -24,8 +32,7 @@ const useMapLogic = (imageUrl, targetPosition, imageWidth, imageHeight) => {
         return -Math.log(imageWidth / maxMapSize) / Math.log(2);
     }, [imageWidth]);
 
-    const cleanupMap = useCallback((map) => {
-
+    const cleanupMap = useCallback(() => {
         if (userMarkerRef.current) {
             userMarkerRef.current.removeFrom(mapInstanceRef.current);
             userMarkerRef.current = null;
@@ -38,8 +45,21 @@ const useMapLogic = (imageUrl, targetPosition, imageWidth, imageHeight) => {
             mapInstanceRef.current.setView(mapInstanceRef.current.getCenter(), calculateMinZoom());
             mapInstanceRef.current.invalidateSize();
         }
-    }, []);
+    }, [calculateMinZoom]);
 
+    const handleChooseClick = () => {
+        if (!userPosition) return;
+        setIsFullScreen(true);
+        calculateScore(userPosition, targetPosition);
+    };
+
+    const handleNextClick = () => {
+        setIsFullScreen(false);
+        setUserPosition(null);
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % panoramas.length);
+        resetExpand();
+        if (cleanupMap) cleanupMap();
+    };
 
     const initializeMap = useCallback((mapContainer, mapInstance) => {
         if (!mapContainer || mapInstance.current) return null;
@@ -92,6 +112,49 @@ const useMapLogic = (imageUrl, targetPosition, imageWidth, imageHeight) => {
         setUserPosition(e.latlng);
     }, [isFullScreen]);
 
+    const animateResize = useCallback((start, end, mapInstanceRef, duration) => {
+        const startTime = performance.now();
+        const animate = (currentTime) => {
+            const elapsedTime = currentTime - startTime;
+            const progress = Math.min(elapsedTime / duration, 1);
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+            const currentSize = start + (end - start) * easeProgress;
+            setMapSize(currentSize);
+
+            if (mapInstanceRef.current) {
+                const map = mapInstanceRef.current;
+                const prevCenter = map.getCenter();
+                const prevZoom = map.getZoom();
+                map.invalidateSize();
+                map.setView(prevCenter, prevZoom, { animate: false });
+            }
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                setIsExpanded(end === 800);
+            }
+        };
+        requestAnimationFrame(animate);
+    }, [setMapSize, setIsExpanded]);
+
+    const handleResize = useCallback((shouldExpand) => {
+        if (resizeTimeoutRef.current) {
+            clearTimeout(resizeTimeoutRef.current);
+        }
+
+        resizeTimeoutRef.current = setTimeout(() => {
+            if (shouldExpand !== isExpanded) {
+                animateResize(shouldExpand ? 400 : 800, shouldExpand ? 800 : 400, mapInstanceRef, 300);
+            }
+        }, 100);
+    }, [animateResize, isExpanded]);
+
+    const resetExpand = () => {
+        setIsExpanded(false);
+        handleResize(false);
+    }
+
 
     useEffect(() => {
         initializeMap(mapRef.current, mapInstanceRef);
@@ -111,16 +174,22 @@ const useMapLogic = (imageUrl, targetPosition, imageWidth, imageHeight) => {
 
     return {
         mapRef,
+        mapSize,
         fullscreenMapRef,
         mapInstanceRef,
         fullscreenMapInstanceRef,
         handleMapClick,
         isFullScreen,
+        isPortrait,
+        isExpanded,
         setIsFullScreen,
         userPosition,
         setUserPosition,
         initializeMap,
-        cleanupMap
+        cleanupMap,
+        handleResize,
+        handleChooseClick,
+        handleNextClick
     };
 };
 
