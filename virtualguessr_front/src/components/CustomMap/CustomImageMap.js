@@ -1,5 +1,4 @@
-// CustomImageMap.js
-import React, { useEffect } from 'react';
+import React from 'react';
 import useMapLogic from '../../hooks/useMapLogic';
 import useScoreCalculation from '../../hooks/useScoreCalculation';
 import MapContainer from './MapContainer';
@@ -21,18 +20,11 @@ const CustomImageMap = ({ imageUrl, imageWidth, imageHeight, targetPosition, sty
         initializeMap,
         isPortrait,
         isExpanded,
-        cleanupMap,
         handleResize,
         handleChooseClick,
         handleNextClick
 
     } = useMapLogic(imageUrl, targetPosition, imageWidth, imageHeight, calculateScore);
-    
-    useEffect(() => {
-        if (setCleanupMap) {
-            setCleanupMap(cleanupMap);
-        }
-    }, [setCleanupMap, cleanupMap]);
 
     return (
         <>

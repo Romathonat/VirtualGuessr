@@ -1,5 +1,5 @@
 import React from 'react';
-import CustomImageMap from './CustomMap/CustomImageMap';
+import CustomImageMap from './CustomImageMap';
 
 const LandscapeMinimap = React.memo(({ imageUrl, imageWidth, imageHeight, targetPosition, isPortrait, handleChooseClick }) => (
   <div style={{

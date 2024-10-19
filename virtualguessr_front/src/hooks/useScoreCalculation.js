@@ -1,4 +1,3 @@
-// useScoreCalculation.js
 import { useState, useCallback } from 'react';
 
 const useScoreCalculation = (imageWidth, imageHeight) => {

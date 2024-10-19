@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { useGameContext } from '../contexts/GameContext';
-import useScoreCalculation from './useScoreCalculation';
 
 const useGameLogic = (panoramas, cleanupMap) => {
     const {
@@ -17,6 +16,7 @@ const useGameLogic = (panoramas, cleanupMap) => {
     const [hfov, setHfov] = useState(window.innerWidth / 13762 * 360);
     const [vaov, setVaov] = useState(window.innerHeight / 1306 * 41.7);
 
+
     const timeoutRef = useRef(null);
     const pannellumRef = useRef(null);
     const containerRef = useRef(null);
@@ -25,7 +25,9 @@ const useGameLogic = (panoramas, cleanupMap) => {
         const newIsPortrait = window.innerHeight > window.innerWidth;
         setIsPortrait(newIsPortrait);
         setHfov(window.innerWidth / 13762 * 360);
-        setVaov(window.innerHeight / 1306 * 41.7);
+        const baseVaov = window.innerHeight / 1306 * 41.7;
+        setVaov(newIsPortrait ? baseVaov * 2 : baseVaov);
+
 
         if (pannellumRef.current) {
             pannellumRef.current.setHfov(window.innerWidth / 13762 * 360);

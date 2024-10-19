@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import styles from './CustomShovelIcon.module.css';
@@ -58,7 +58,7 @@ const useMapLogic = (imageUrl, targetPosition, imageWidth, imageHeight, calculat
         setUserPosition(null);
         setCurrentIndex((prevIndex) => (prevIndex + 1) % panoramas.length);
         resetExpand();
-        if (cleanupMap) cleanupMap();
+        cleanupMap();
     };
 
     const initializeMap = useCallback((mapContainer, mapInstance) => {
@@ -79,7 +79,20 @@ const useMapLogic = (imageUrl, targetPosition, imageWidth, imageHeight, calculat
         const overlay = L.imageOverlay(imageUrl, bounds);
         overlay.addTo(map);
         map.setMaxBounds(bounds);
-        map.fitBounds(bounds);
+        
+        // Ajuster le zoom et la position pour remplir l'espace
+        const containerSize = mapContainer.getBoundingClientRect();
+        const imageRatio = imageWidth / imageHeight;
+        const containerRatio = containerSize.width / containerSize.height;
+        
+        let zoom;
+        if (containerRatio > imageRatio) {
+            zoom = Math.log2(containerSize.width / imageWidth);
+        } else {
+            zoom = Math.log2(containerSize.height / imageHeight);
+        }
+        
+        map.setView([imageHeight / 2, imageWidth / 2], zoom);
 
         map.on('click', handleMapClick);
         mapInstance.current = map;
@@ -170,7 +183,7 @@ const useMapLogic = (imageUrl, targetPosition, imageWidth, imageHeight, calculat
             }
             userMarkerRef.current = null;
         };
-    }, [initializeMap]);
+    }, [initializeMap, targetPosition, imageUrl, imageWidth, imageHeight]);
 
     return {
         mapRef,

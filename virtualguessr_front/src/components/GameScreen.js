@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import PortraitMap from './PortraitMap';
-import LandscapeMinimap from './LandscapeMinimap';
+import React, { useState, useMemo } from 'react';
+import PortraitMap from './CustomMap/PortraitMap';
+import LandscapeMinimap from './CustomMap/LandscapeMinimap';
 import NewsletterIcon from './NewsletterIcon';
 import PanoramaViewer from './PanoramaViewer';
 import ScoreDisplay from './ScoreDisplay';

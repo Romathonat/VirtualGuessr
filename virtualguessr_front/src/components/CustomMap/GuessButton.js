@@ -1,4 +1,3 @@
-// GuessButton.js
 import React from 'react';
 
 const GuessButton = ({ onClick }) => (

@@ -1,4 +1,3 @@
-// ScoreDisplay.js
 import React from 'react';
 
 const ScoreDisplay = ({ score }) => {
