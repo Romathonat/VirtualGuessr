@@ -48,8 +48,9 @@ const useMapLogic = (imageUrl, targetPosition, imageWidth, imageHeight, calculat
     }, [calculateMinZoom]);
 
     const handleChooseClick = () => {
+        console.log('userPosition', userPosition);
         if (!userPosition) return;
-        setIsFullScreen(true);
+        setIsFullScreen(true);   
         calculateScore(userPosition, targetPosition);
     };
 
@@ -72,8 +73,9 @@ const useMapLogic = (imageUrl, targetPosition, imageWidth, imageHeight, calculat
             zoomDelta: 0.1,
             attributionControl: false,
             maxBoundsViscosity: 1.0,
-            fullscreenControl: false
+            fullscreenControl: false,
         });
+
 
         const bounds = [[0, 0], [imageHeight, imageWidth]];
         const overlay = L.imageOverlay(imageUrl, bounds);
