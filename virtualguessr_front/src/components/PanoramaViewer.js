@@ -13,20 +13,25 @@ const PanoramaViewer = ({ panoramaUrl, hfov, vaov, isPortrait }) => {
       }
       
       pannellumRef.current = window.pannellum.viewer(containerRef.current, {
-        type: 'equirectangular',
-        panorama: panoramaUrl,
+        type: 'cubemap',
+        "cubeMap": [
+          `${panoramaUrl}/front.jpg`,
+          `${panoramaUrl}/right.jpg`,
+          `${panoramaUrl}/back.jpg`,
+          `${panoramaUrl}/left.jpg`,
+          `${panoramaUrl}/top.jpg`,
+          `${panoramaUrl}/bottom.jpg`,
+        ],
         autoLoad: true,
         compass: false,
         showZoomCtrl: false,
-        mouseZoom: false,
-        hfov: hfov,
-        vaov: vaov,
-        minPitch: -17,
-        maxPitch: 17,
-        pitch: 0,
+        mouseZoom: true,
         showFullscreenCtrl: false,
         keyboardZoom: false,
         disableKeyboardCtrl: true,
+        hfov: 120,
+        minHfov: 120,
+        maxHfov: 120,
       });
     }
   }, [panoramaUrl, isPortrait, hfov, vaov]);

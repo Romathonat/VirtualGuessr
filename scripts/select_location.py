@@ -1,75 +1,95 @@
 import csv
 import os
 import tkinter as tk
-from tkinter import filedialog
-
+from tkinter import ttk
 from PIL import Image, ImageTk
 
 
 class LocationPicker:
     def __init__(self, master):
         self.master = master
-        self.master.title("Location Picker")
+        self.master.title("Sélecteur de localisation")
 
-        self.canvas = tk.Canvas(master, width=1200, height=1200)
-        self.canvas.pack()
+        # Redimensionnement de la fenêtre principale
+        self.master.geometry("1920x1080")
 
-        self.load_button = tk.Button(
-            master, text="Charger les images", command=self.load_images
-        )
-        self.load_button.pack()
+        # Création des cadres pour les deux visualisations
+        self.frame_map = ttk.Frame(master)
+        self.frame_map.pack(side=tk.LEFT, padx=10, pady=10)
+        self.frame_capture = ttk.Frame(master)
+        self.frame_capture.pack(side=tk.RIGHT, padx=10, pady=10)
+
+        # Canvas pour la carte Erangel
+        self.canvas_map = tk.Canvas(self.frame_map, width=1024, height=1024)
+        self.canvas_map.pack(expand=True, fill=tk.BOTH)
+
+        # Canvas pour la capture du jeu
+        self.canvas_capture = tk.Canvas(self.frame_capture, width=800, height=600)
+        self.canvas_capture.pack(expand=True, fill=tk.BOTH)
+
+        # Chargement de la carte Erangel
+        self.load_erangel_map()
 
         self.images = []
         self.current_image = 0
         self.csv_file = "positions.csv"
-        self.image_folder = ""
+        self.base_folder = "../virtualguessr_front/public/images/cubemap"
+        self.map_size = 8192  # Taille réelle de la carte
+        self.display_size = 1024
 
-        self.canvas.bind("<Button-1>", self.on_click)
+        self.canvas_map.bind("<Button-1>", self.on_click)
+        self.load_images()
 
-        self.display_size = 1200
-        self.map_size = 8192
+    def load_erangel_map(self):
+        map_path = "../virtualguessr_front/public/images/erangel.jpg"
+        self.erangel_map = Image.open(map_path)
+        self.erangel_map = self.erangel_map.resize((1024, 1024), Image.LANCZOS)
+        self.erangel_photo = ImageTk.PhotoImage(self.erangel_map)
+        self.canvas_map.create_image(0, 0, anchor=tk.NW, image=self.erangel_photo)
 
     def load_images(self):
-        self.image_folder = filedialog.askdirectory(
-            title="Sélectionner le dossier des images de localisation"
-        )
-        if self.image_folder:
-            self.images = [
-                f
-                for f in os.listdir(self.image_folder)
+        folder_index = 1
+        while True:
+            folder_path = os.path.join(self.base_folder, str(folder_index))
+            if not os.path.exists(folder_path):
+                break
+            self.images.extend([
+                os.path.join(folder_path, f)
+                for f in os.listdir(folder_path)
                 if f.endswith("_loc.jpg") or f.endswith("_loc.png")
-            ]
-            self.images.sort()  # Trier les images par ordre alphabétique
-            if self.images:
-                self.load_image(os.path.join(self.image_folder, self.images[0]))
-                self.load_button.config(state=tk.DISABLED)
+            ])
+            folder_index += 1
+        
+        self.images.sort()
+        if self.images:
+            self.load_capture(self.images[0])
 
-    def load_image(self, path):
+    def load_capture(self, path):
         image = Image.open(path)
-        image = image.resize((self.display_size, self.display_size), Image.LANCZOS)
-        self.photo = ImageTk.PhotoImage(image)
-        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.photo)
-        self.master.title(f"Location Picker - {os.path.basename(path)}")
+        width, height = image.size
+        ratio = min(800 / width, 600 / height)
+        new_width = int(width * ratio)
+        new_height = int(height * ratio)
+        image = image.resize((new_width, new_height), Image.LANCZOS)
+        self.capture_photo = ImageTk.PhotoImage(image)
+        self.canvas_capture.create_image(400, 300, anchor=tk.CENTER, image=self.capture_photo)
+        self.master.title(f"Sélecteur de localisation - {os.path.basename(path)}")
 
     def on_click(self, event):
         x, y = event.x, event.y
-        map_x, map_y = self.convert_coordinates(x, y)
-        image_id = os.path.splitext(self.images[self.current_image])[0]
-        self.append_to_csv(image_id, map_x, map_y)
-        print(f"Position enregistrée pour {image_id}: ({map_x}, {map_y})")
+        # Conversion des coordonnées du clic à l'échelle de la carte réelle
+        real_x = int(x * (self.map_size / self.display_size))
+        real_y = int(y * (self.map_size / self.display_size))
+        
+        image_id = os.path.splitext(os.path.basename(self.images[self.current_image]))[0]
+        self.append_to_csv(image_id, real_x, real_y)
+        print(f"Position enregistrée pour {image_id}: ({real_x}, {real_y})")
         self.next_image()
-
-    def convert_coordinates(self, x, y):
-        map_x = int((x / self.display_size) * self.map_size)
-        map_y = int((y / self.display_size) * self.map_size)
-        return map_x, map_y
 
     def next_image(self):
         self.current_image += 1
         if self.current_image < len(self.images):
-            self.load_image(
-                os.path.join(self.image_folder, self.images[self.current_image])
-            )
+            self.load_capture(self.images[self.current_image])
         else:
             print("Toutes les images ont été traitées. Fermeture de l'application.")
             self.master.quit()

@@ -13,12 +13,28 @@ const GameScreen = () => {
 
   const panoramas = useMemo(() => [
     {
-      url: '/images/13.jpg',
-      position: { x: 6294, y: 3973 },
+      url: '/images/cubemap/1',
+      position: { x: 3968, y: 5632 },
     },
     {
-      url: '/images/14.jpg',
-      position: { x: 3495, y: 3973 },
+      url: '/images/cubemap/2',
+      position: { x: 6088, y: 3720 },
+    },
+    {
+      url: '/images/cubemap/3',
+      position: { x: 6256, y: 3856 },
+    },
+    {
+      url: '/images/cubemap/4',
+      position: { x: 5648, y: 5000 },
+    },
+    {
+      url: '/images/cubemap/5',
+      position: { x: 4040, y: 6368 },
+    },
+    {
+      url: '/images/cubemap/6',
+      position: { x: 4312, y: 5792 },
     },
   ], []);
   
