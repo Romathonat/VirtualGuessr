@@ -29,9 +29,7 @@ const PanoramaViewer = ({ panoramaUrl, hfov, vaov, isPortrait }) => {
         showFullscreenCtrl: false,
         keyboardZoom: false,
         disableKeyboardCtrl: true,
-        hfov: 120,
-        minHfov: 120,
-        maxHfov: 120,
+        hfov: isPortrait ? 60 : 120,
       });
     }
   }, [panoramaUrl, isPortrait, hfov, vaov]);
