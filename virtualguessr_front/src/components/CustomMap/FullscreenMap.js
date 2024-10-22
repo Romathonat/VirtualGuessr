@@ -10,19 +10,19 @@ const FullscreenMap = ({ fullscreenMapRef, fullscreenMapInstanceRef, handleNextC
         const map = initializeMap(fullscreenMapRef.current, fullscreenMapInstanceRef);
 
         if (map && userPosition && targetPosition) {
-            const customShovelIcon = L.icon({
-                iconUrl: '/images/shovel_icon.png',
-                iconSize: [22, 61],
-                iconAnchor: [11, 61],
+            const customPointer = L.icon({
+                iconUrl: '/images/pointer.png',
+                iconSize: [26, 39],
+                iconAnchor: [13, 39],
             });
 
             const flagIcon = L.icon({
-                iconUrl: '/images/flag_icon.png',
-                iconSize: [62, 70],
-                iconAnchor: [2, 70],
+                iconUrl: '/images/target.png',
+                iconSize: [26, 40],
+                iconAnchor: [13, 40],
             });
 
-            const userMarker = L.marker([userPosition.lat, userPosition.lng], { icon: customShovelIcon });
+            const userMarker = L.marker([userPosition.lat, userPosition.lng], { icon: customPointer });
             const targetMarker = L.marker([targetPosition.y, targetPosition.x], { icon: flagIcon });
 
             const bounds = L.latLngBounds([userPosition, [targetPosition.y, targetPosition.x]]).pad(0.1);
@@ -94,7 +94,7 @@ const FullscreenMap = ({ fullscreenMapRef, fullscreenMapInstanceRef, handleNextC
                         color: 'white',
                         border: 'none',
                         borderRadius: '5px',
-                        cursor: 'pointer',
+                        cursor: '   ',
                     }}>
                         Next
                     </button>

@@ -1,7 +1,7 @@
 import { useRef, useCallback, useEffect } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import styles from './CustomShovelIcon.module.css';
+import styles from './CustomPointer.module.css';
 import { useGameContext } from '../contexts/GameContext';
 
 
@@ -111,17 +111,17 @@ const useMapLogic = (imageUrl, targetPosition, imageWidth, imageHeight, calculat
             return;
         }
 
-        const customShovelIcon = L.divIcon({
-            className: styles.customShovelIcon,
-            html: `<div style="background-image: url('/images/shovel_icon.png')" class="${styles.shovelIconInner}"></div>`,
-            iconSize: [22, 61],
-            iconAnchor: [11, 61],
+        const customPointerIcon = L.divIcon({
+            className: styles.customPointer,
+            html: `<div style="background-image: url('/images/pointer.png')" class="${styles.pointerIconInner}"></div>`,
+            iconSize: [26, 39],
+            iconAnchor: [13, 39],
         });
 
         if (userMarkerRef.current) {
             userMarkerRef.current.setLatLng(e.latlng);
         } else {
-            userMarkerRef.current = L.marker(e.latlng, { icon: customShovelIcon }).addTo(mapInstanceRef.current);
+            userMarkerRef.current = L.marker(e.latlng, { icon: customPointerIcon }).addTo(mapInstanceRef.current);
         }
 
         setUserPosition(e.latlng);
