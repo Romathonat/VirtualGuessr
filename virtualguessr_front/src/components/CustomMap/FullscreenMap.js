@@ -1,10 +1,20 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ScoreDisplay from './ScoreDisplay';
 import L from 'leaflet';
 import { useGameContext } from '../../contexts/GameContext';
 
-const FullscreenMap = ({ fullscreenMapRef, fullscreenMapInstanceRef, handleNextClick, initializeMap,  }) => {
+const FullscreenMap = ({ fullscreenMapRef, fullscreenMapInstanceRef, handleNextClick, initializeMap }) => {
     const { score, userPosition, targetPosition } = useGameContext();
+    const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsPortrait(window.innerHeight > window.innerWidth);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         const map = initializeMap(fullscreenMapRef.current, fullscreenMapInstanceRef);
@@ -46,6 +56,12 @@ const FullscreenMap = ({ fullscreenMapRef, fullscreenMapInstanceRef, handleNextC
 
                 line.addTo(map);
                 drawLine(0);
+
+                // Ajoutez ces lignes
+                setTimeout(() => {
+                    map.invalidateSize();
+                    map.fitBounds(bounds);
+                }, 100);
             });
         }
 
@@ -82,19 +98,20 @@ const FullscreenMap = ({ fullscreenMapRef, fullscreenMapInstanceRef, handleNextC
                 }} />
                 <div style={{
                     position: 'absolute',
-                    top: '10px',
-                    right: '10px',
+                    [isPortrait ? 'top' : 'bottom']: '10px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
                     zIndex: 1001
                 }}>
                     <button onClick={handleNextClick} style={{
                         padding: '10px 20px',
                         fontSize: '16px',
                         fontWeight: 'bold',
-                        backgroundColor: '#f44336',
+                        backgroundColor: '#2B4B6F',
                         color: 'white',
                         border: 'none',
                         borderRadius: '5px',
-                        cursor: '   ',
+                        cursor: 'pointer',
                     }}>
                         Next
                     </button>

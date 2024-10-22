@@ -11,11 +11,20 @@ const MapContainer = ({ mapRef, mapSize, isExpanded, isFullScreen, handleResize,
             width: `${mapSize}px`,
             height: `${mapSize}px`,
             cursor: 'crosshair',
+            position: 'relative',
             ...style
         }}
     >
         {(isExpanded || isPortrait) && !isFullScreen && (
-            <GuessButton onClick={handleChooseClick} />
+            <GuessButton 
+                onClick={handleChooseClick} 
+                isPortrait={isPortrait}
+                style={{
+                    position: 'absolute',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                }}
+            />
         )}
     </div>
 );

@@ -1,19 +1,20 @@
 import React from 'react';
 
-const GuessButton = ({ onClick }) => (
+const GuessButton = ({ onClick, isPortrait }) => (
     <button
         className="guess-button"
         onClick={onClick}
         style={{
             position: 'absolute',
-            bottom: '15px',
+            top: isPortrait ? '10px' : 'auto',
+            bottom: isPortrait ? 'auto' : '10px',
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 1000,
             padding: '10px 20px',
             fontSize: '16px',
             fontWeight: 'bold',
-            backgroundColor: '#4CAF50',
+            backgroundColor: '#9B2E2E',
             color: 'white',
             border: 'none',
             borderRadius: '5px',
