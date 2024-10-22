@@ -18,6 +18,7 @@ const GuessButton = ({ onClick, isPortrait }) => (
             color: 'white',
             border: 'none',
             borderRadius: '5px',
+            border: '1px solid white', // Ajout de la bordure blanche
             cursor: 'pointer',
         }}
     >

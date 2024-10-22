@@ -1,20 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import ScoreDisplay from './ScoreDisplay';
 import L from 'leaflet';
 import { useGameContext } from '../../contexts/GameContext';
 
-const FullscreenMap = ({ fullscreenMapRef, fullscreenMapInstanceRef, handleNextClick, initializeMap }) => {
+const FullscreenMap = ({ fullscreenMapRef, fullscreenMapInstanceRef, handleNextClick, initializeMap,  }) => {
     const { score, userPosition, targetPosition } = useGameContext();
-    const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
-
-    useEffect(() => {
-        const handleResize = () => {
-            setIsPortrait(window.innerHeight > window.innerWidth);
-        };
-
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     useEffect(() => {
         const map = initializeMap(fullscreenMapRef.current, fullscreenMapInstanceRef);
@@ -56,12 +46,6 @@ const FullscreenMap = ({ fullscreenMapRef, fullscreenMapInstanceRef, handleNextC
 
                 line.addTo(map);
                 drawLine(0);
-
-                // Ajoutez ces lignes
-                setTimeout(() => {
-                    map.invalidateSize();
-                    map.fitBounds(bounds);
-                }, 100);
             });
         }
 
@@ -98,9 +82,8 @@ const FullscreenMap = ({ fullscreenMapRef, fullscreenMapInstanceRef, handleNextC
                 }} />
                 <div style={{
                     position: 'absolute',
-                    [isPortrait ? 'top' : 'bottom']: '10px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
+                    top: '10px',
+                    right: '10px',
                     zIndex: 1001
                 }}>
                     <button onClick={handleNextClick} style={{
@@ -109,7 +92,7 @@ const FullscreenMap = ({ fullscreenMapRef, fullscreenMapInstanceRef, handleNextC
                         fontWeight: 'bold',
                         backgroundColor: '#2B4B6F',
                         color: 'white',
-                        border: 'none',
+                        border: '1px solid white', // Ajout de la bordure blanche
                         borderRadius: '5px',
                         cursor: 'pointer',
                     }}>

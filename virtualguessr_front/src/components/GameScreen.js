@@ -46,6 +46,7 @@ const GameScreen = () => {
     globalScore,
     showResult,
     isPortrait,
+    isFullScreen,
     currentIndex,
     handleChooseClick
   } = useGameLogic(panoramas, cleanupMapFunction);
@@ -83,6 +84,8 @@ const GameScreen = () => {
         showNewsletterForm={showNewsletterForm}
         handleMouseEnter={handleMouseEnter}
         handleMouseLeave={handleMouseLeave}
+        isFullScreen={isFullScreen}
+        isPortrait={isPortrait}
       />
 
       {!isPortrait && (
