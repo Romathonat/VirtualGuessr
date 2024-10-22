@@ -44,7 +44,14 @@ const NewsletterSignup = () => {
         <button
           type="submit"
           disabled={loading}
-          className="submit-button"
+          style={{
+            padding: '10px 20px',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            backgroundColor: '#9B2E2E',
+            color: 'white',
+            borderRadius: '5px',
+          }}
         >
           {loading ? 'Subscribing...' : "Be part of this journey"}
         </button>
@@ -52,7 +59,6 @@ const NewsletterSignup = () => {
       {status === 'success' && (
         <div className="alert success">
           Thanks for subscribing ! Check your mails for confirmation
-
         </div>
       )}
       {status === 'error' && (
