@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import PortraitMap from './CustomMap/PortraitMap';
 import LandscapeMinimap from './CustomMap/LandscapeMinimap';
 import NewsletterIcon from './NewsletterIcon';
@@ -11,36 +11,13 @@ const GameScreen = () => {
   const imageWidth = 8192;
   const imageHeight = 8192;
 
-  const panoramas = useMemo(() => [
-    {
-      url: '/images/cubemap/1',
-      position: { x: 6016, y: 3584 },
-    },
-    {
-      url: '/images/cubemap/2',
-      position: { x: 6256, y: 3848 },
-    },
-    {
-      url: '/images/cubemap/3',
-      position: { x: 5800, y: 4800 },
-    },
-    {
-      url: '/images/cubemap/4',
-      position: { x: 5752, y: 4216 },
-    },
-    {
-      url: '/images/cubemap/5',
-      position: { x: 4440, y: 6760 },
-    },
-    {
-      url: '/images/cubemap/6',
-      position: { x: 3720, y: 6816 },
-    },
-  ], []);
-  
+  // const [panoramas, setPanoramas] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [cleanupMapFunction, setCleanupMapFunction] = useState(null);
 
   const {
+    panoramas,
+    setPanoramas,
     hfov,
     vaov,
     globalScore,
@@ -49,9 +26,38 @@ const GameScreen = () => {
     isFullScreen,
     currentIndex,
     handleChooseClick
-  } = useGameLogic(panoramas, cleanupMapFunction);
+  } = useGameLogic();
+
   const { showNewsletterForm, handleMouseEnter, handleMouseLeave } = useNewsletterForm();
 
+  useEffect(() => {
+    setIsLoading(true);
+    fetch('/images/cubemap/positions.csv')
+      .then(response => response.text())
+      .then(data => {
+        const rows = data.split('\n').slice(1); // Ignorer l'en-tête
+        const parsedPanoramas = rows.map(row => {
+          const [nom, x, y] = row.split(',');
+          const number = nom.split('_')[0];
+          return {
+            url: `/images/cubemap/${number}`,
+            position: { x: parseInt(x), y: parseInt(y) }
+          };
+        });
+        setPanoramas(parsedPanoramas);
+        console.log('panoramas', parsedPanoramas);
+        setIsLoading(false);
+      })
+      .catch(error => {
+        console.error('Erreur lors du chargement du CSV:', error);
+        setIsLoading(false);
+      });
+  }, [setPanoramas]);
+
+
+  if (isLoading || panoramas.length === 0) {
+    return <div>Chargement...</div>;
+  }
 
   return (
     <div style={{
@@ -62,7 +68,7 @@ const GameScreen = () => {
       flexDirection: isPortrait ? 'column' : 'row'
     }}>
       <PanoramaViewer
-        panoramaUrl={panoramas[currentIndex].url}
+        panoramaUrl={panoramas[currentIndex]?.url}
         hfov={hfov}
         vaov={vaov}
         isPortrait={isPortrait}
@@ -74,7 +80,7 @@ const GameScreen = () => {
           imageUrl="/images/erangel.jpg"
           imageWidth={imageWidth}
           imageHeight={imageHeight}
-          targetPosition={panoramas[currentIndex].position}
+          targetPosition={panoramas[currentIndex]?.position}
           isPortrait={isPortrait}
           setCleanupMap={setCleanupMapFunction}
         />
@@ -94,7 +100,7 @@ const GameScreen = () => {
           imageUrl="/images/erangel.jpg"
           imageWidth={imageWidth}
           imageHeight={imageHeight}
-          targetPosition={panoramas[currentIndex].position}
+          targetPosition={panoramas[currentIndex]?.position}
           isPortrait={isPortrait}
           onCleanupMap={setCleanupMapFunction}
         />

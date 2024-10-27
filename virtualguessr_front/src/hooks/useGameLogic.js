@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useGameContext } from '../contexts/GameContext';
 
-const useGameLogic = (panoramas, cleanupMap) => {
+const useGameLogic = () => {
     const {
+        panoramas,  
+        setPanoramas,
         globalScore,
         showResult,
         isPortrait,
@@ -10,7 +12,6 @@ const useGameLogic = (panoramas, cleanupMap) => {
         setIsPortrait,
         currentIndex,
         setCurrentIndex,
-        setPanoramas,
     } = useGameContext();
 
     const [showNewsletterForm, setShowNewsletterForm] = useState(false);
@@ -39,11 +40,12 @@ const useGameLogic = (panoramas, cleanupMap) => {
     useEffect(() => {
         window.addEventListener('resize', handleResize);
         handleResize();
-        setPanoramas(panoramas);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     return {
+        panoramas,
+        setPanoramas,
         showNewsletterForm,
         setShowNewsletterForm,
         hfov,

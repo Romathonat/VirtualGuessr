@@ -3,6 +3,8 @@ import numpy as np
 import pytesseract
 from PIL import Image
 import sys
+import os
+import csv
 
 def find_strongest_line(img, start, direction, search_range=318, line_width=5, threshold=10):
     height, width = img.shape[:2]
@@ -149,8 +151,8 @@ def detect_grid_position(image_path):
     pixel_x = center_x - left
     pixel_y = center_y - top
 
-    pixel_x_scaled = pixel_x * 150 / 316 # because we need to reduce it
-    pixel_y_scaled = pixel_y * 150 / 316
+    pixel_x_scaled = pixel_x * 1024 / 316 # because we need to scale it to final map size
+    pixel_y_scaled = pixel_y * 1024 / 316
 
     # Extraire et reconnaître les lettres
     roi_height = 40  # Augmenté pour capturer plus de contexte
@@ -188,34 +190,55 @@ def calculate_absolute_position(grid_square, pixel_x, pixel_y):
     vertical_letter, horizontal_letter = grid_square.split()
 
     # Calculer la position du coin supérieur gauche du carré courant
-    top_left_y = (ord(horizontal_letter) - ord('I')) * 150
-    top_left_x = (ord(vertical_letter) - ord('A')) * 150
+    top_left_y = (ord(horizontal_letter) - ord('I')) * 1024
+    top_left_x = (ord(vertical_letter) - ord('A')) * 1024
 
 
     absolute_x = top_left_x + pixel_x
     absolute_y = top_left_y + pixel_y
 
-    return absolute_x, absolute_y
+    return int(absolute_x), int(absolute_y)
 
-def main(image_path):
-    try:
-        # Détecter la position
-        grid_square, pixel_x, pixel_y, absolute_x, absolute_y = detect_grid_position(image_path)
-        
-        print(f"Position dans la grille: {grid_square}")
-        print(f"Position relative X: {pixel_x} pixels")
-        print(f"Position relative Y: {pixel_y} pixels")
-        print(f"Position absolue X: {absolute_x} pixels")
-        print(f"Position absolue Y: {absolute_y} pixels")
-        print("Une image 'detected_lines.jpg' a été générée avec les lignes détectées.")
-        
-    except Exception as e:
-        print(f"Erreur: {str(e)}")
+def main(base_path):
+    positions = {}
+    csv_path = os.path.join(base_path, 'positions.csv')
+
+    # Charger les positions existantes
+    if os.path.exists(csv_path):
+        with open(csv_path, 'r') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                positions[row[0]] = row[1:]
+
+    # Parcourir tous les sous-dossiers
+    for root, dirs, files in os.walk(base_path):
+        for file in files:
+            if file.endswith('_loc.jpg'):
+                image_path = os.path.join(root, file)
+                image_name = file
+
+                # Vérifier si l'image a déjà été analysée
+                if image_name not in positions:
+                    try:
+                        # Détecter la position
+                        _, _, _, absolute_x, absolute_y = detect_grid_position(image_path)
+                        positions[image_name] = [absolute_x, absolute_y]
+                        print(f"Analysé: {image_name}")
+                    except Exception as e:
+                        print(f"Erreur lors de l'analyse de {image_name}: {str(e)}")
+
+    # Enregistrer les résultats dans positions.csv
+    with open(csv_path, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        for image_name, data in positions.items():
+            writer.writerow([image_name] + data)
+
+    print(f"Résultats enregistrés dans {csv_path}")
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python image_analysis.py <chemin_de_l'image>")
+        print("Usage: python image_analysis.py <chemin_de_base>")
         sys.exit(1)
     
-    image_path = sys.argv[1]
-    main(image_path)
+    base_path = sys.argv[1]
+    main(base_path)
