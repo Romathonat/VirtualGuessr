@@ -1,5 +1,8 @@
 
-![](demo_guessr.mp4)
+![](demo_gif.gif)
+
+# Stand by
+Due to legal issues and the complexity to generate assets for the game, I have to put it into stand by
 
 # Dev
 To launch as dev:
