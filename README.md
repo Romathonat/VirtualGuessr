@@ -2,7 +2,7 @@
 ![](demo_gif.gif)
 
 # Stand by
-Due to legal issues and the complexity to generate assets for the game, I have to put it into stand by
+Due to legal issues and the complexity to generate assets for the game, I have to put it in stand by
 
 # Dev
 To launch as dev:
